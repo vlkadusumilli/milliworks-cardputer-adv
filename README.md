@@ -86,6 +86,10 @@ which lets you keep several firmwares on the Cardputer and switch between them.
 When updating, first remove the old version in Launcher's **PM** (partition manager), then
 choose **Apply Changes**. Launcher keeps each installed version in its own slot.
 
+**Stable or test build?** The [latest release](../../releases/latest) is always the stable
+one. Test builds are marked *Pre-release* and named like `v19-beta.1`. They're for trying
+the next version early. See [RELEASING.md](RELEASING.md) and [CHANGELOG.md](CHANGELOG.md).
+
 ### 2. The voices (for Breathe)
 
 1. Download `milliWorks-sd-card.zip` from the same release and unzip it.
