@@ -6,6 +6,7 @@ when the release becomes stable.
 
 ## Unreleased
 
+- Flow: the **Soft drone** sound can now be heard on the Cardputer. Its tones were too low for the small speaker; they are now pitched higher.
 - Breathe: counting is now an **On/Off** setting for the voice (Guidance: Voice, then Count: On or Off) instead of a separate "Count" guidance. If you chose Count in an earlier test build, you get Voice with Count On.
 - Home: the Music app is hidden until it's ready.
 - Breathe: uses the voice on your SD card straight away. Before, it looked for an old voice (Samantha) until you picked one in Settings, and quietly played the small built-in voice without counting. Now it uses **luna** if it's on the card, or else the first voice it finds.

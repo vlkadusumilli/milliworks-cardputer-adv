@@ -56,14 +56,17 @@ struct FocusGen {
                 }
                 return v;
             }
-            case FS_DRONE: {                        // three low tones that breathe slowly
-                ph1 += kTwoPi * 110.0f / RATE; ph2 += kTwoPi * 164.8f / RATE; ph3 += kTwoPi * 220.5f / RATE;
+            case FS_DRONE: {                        // three soft tones that breathe slowly
+                // Pitched where the Cardputer's tiny speaker can play (it can't do much below
+                // ~400 Hz: the old 110/165/220 Hz drone was nearly silent on the device).
+                ph1 += kTwoPi * 440.0f / RATE; ph2 += kTwoPi * 659.3f / RATE; ph3 += kTwoPi * 880.5f / RATE;
                 lfo += kTwoPi * 0.08f / RATE;
                 if (ph1 > kTwoPi) ph1 -= kTwoPi;
                 if (ph2 > kTwoPi) ph2 -= kTwoPi;
                 if (ph3 > kTwoPi) ph3 -= kTwoPi;
                 if (lfo > kTwoPi) lfo -= kTwoPi;
-                return (sinf(ph1) * 0.4f + sinf(ph2) * 0.4f + sinf(ph3) * 0.15f) * (0.55f + 0.25f * sinf(lfo));
+                return (sinf(ph1) * 0.4f + sinf(ph2) * 0.3f + sinf(ph3) * 0.12f + sinf(2 * ph1) * 0.06f)
+                       * (0.55f + 0.25f * sinf(lfo));
             }
             case FS_TICK: {                         // one quiet tick a second
                 float v = 0;
