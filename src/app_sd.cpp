@@ -60,7 +60,7 @@ static void tidyFolders() {
     sdMakeDirs(SETTINGS_DIR);
     sdMakeDirs(BREATHE_DIR);
     sdMakeDirs(FLOW_DIR);
-    sdMakeDirs(MUSIC_DIR);
+    if (isDir(MW_DIR "/music")) SD.rmdir(MW_DIR "/music");   // v16-v19 made it; only goes if empty
     moveIfThere(MW_DIR "/settings.json", SETTINGS_DIR "/settings.json");
     if (isDir(MW_DIR "/voice")) moveIfThere(MW_DIR "/voice", VOICE_DIR);
     sdMakeDirs(VOICE_DIR);

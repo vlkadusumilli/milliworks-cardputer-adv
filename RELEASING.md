@@ -50,7 +50,7 @@ gives `v19-beta.2`).
 
 **Start-up**
 - [ ] The splash shows `v19-beta.N`. **Settings → About** says `Version 19-beta.N` and *by Milli Labs*.
-- [ ] With the SD card in: `/milliWorks` has `settings`, `breathe/voices`, `flow`, `music`.
+- [ ] With the SD card in: `/milliWorks` has `settings`, `breathe/voices`, `flow` (and no `music` folder).
 - [ ] The Clock shows a time straight away, then the right time once Wi-Fi connects.
 
 **Apps**

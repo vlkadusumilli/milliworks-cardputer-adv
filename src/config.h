@@ -19,15 +19,14 @@
 //   /milliWorks/settings/settings.json      Settings > Save settings to SD card
 //   /milliWorks/breathe/voices/<name>/      Breathe voices (in.wav, hold.wav, out.wav)
 //   /milliWorks/flow/parked.txt             thoughts parked during a Flow session
-//   /milliWorks/music/                      the music player (coming)
 // Older versions used /milliworks/settings.json, /milliworks/voice and /flow; app_sd.cpp
-// moves those into place the first time the card is read.
+// moves those into place the first time the card is read (and removes the empty
+// /milliWorks/music folder that v16-v19 made for a music app that was never built).
 #define MW_DIR       "/milliWorks"
 #define SETTINGS_DIR MW_DIR "/settings"
 #define BREATHE_DIR  MW_DIR "/breathe"
 #define VOICE_DIR    BREATHE_DIR "/voices"
 #define FLOW_DIR     MW_DIR "/flow"
-#define MUSIC_DIR    MW_DIR "/music"
 // Breathe voice used until you pick one (if it's on the card; otherwise the first voice there).
 #define VOICE_DEFAULT "luna"
 

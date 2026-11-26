@@ -67,7 +67,7 @@ the Breathe voice, flip screen, the welcome tour, and the keyboard bridge for th
 </tr>
 </table>
 
-The Music app is coming. Screenshots are from the Mac simulator running the real firmware,
+Screenshots are from the Mac simulator running the real firmware,
 so they match the device pixel for pixel.
 
 ## Install
@@ -108,7 +108,6 @@ milliWorks keeps everything in one folder and creates it when it starts:
 /milliWorks/settings/settings.json     Settings → Save settings to SD card
 /milliWorks/breathe/voices/<name>/     in.wav, hold.wav, out.wav, 2.wav … 8.wav
 /milliWorks/flow/parked.txt            thoughts you parked during Flow
-/milliWorks/music/                     for the Music app (coming)
 ```
 
 `settings.json` lets you move your setup to another Cardputer. Wi-Fi passwords are only

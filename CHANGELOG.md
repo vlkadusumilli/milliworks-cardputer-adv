@@ -6,6 +6,7 @@ when the release becomes stable.
 
 ## Unreleased
 
+- The Music app is removed completely. It was only a placeholder and was never built. The empty `/milliWorks/music` folder that earlier versions made on the SD card is removed automatically.
 ## v19 - 2026-11-26
 
 - About screen: the credit now reads *by Milli Labs*, the author's pen name (GitHub: vlkadusumilli).

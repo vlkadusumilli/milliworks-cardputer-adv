@@ -83,7 +83,7 @@ echo "$bin: $kb KB, Launcher slot $slot KB"
 
 # ---- 4. SD card files ---------------------------------------------------------------------
 say "SD card zip (voices)"
-mkdir -p "$TMP/sd/milliWorks/breathe/voices" "$TMP/sd/milliWorks/settings" "$TMP/sd/milliWorks/flow" "$TMP/sd/milliWorks/music"
+mkdir -p "$TMP/sd/milliWorks/breathe/voices" "$TMP/sd/milliWorks/settings" "$TMP/sd/milliWorks/flow"
 cp -R design/sd/milliWorks/breathe/voices/luna design/sd/milliWorks/breathe/voices/julian "$TMP/sd/milliWorks/breathe/voices/"
 find "$TMP/sd" -name .DS_Store -delete
 zip="$TMP/milliWorks-sd-card.zip"

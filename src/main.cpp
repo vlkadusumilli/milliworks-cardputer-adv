@@ -12,7 +12,7 @@
 
 bool sdMount();     // app_sd.cpp
 
-enum Glyph : uint8_t { G_WIFI, G_CLOCK, G_SD, G_GEAR, G_REMOTE, G_FOCUS, G_MUSIC, G_STATUS, G_BREATHE };
+enum Glyph : uint8_t { G_WIFI, G_CLOCK, G_SD, G_GEAR, G_REMOTE, G_FOCUS, G_STATUS, G_BREATHE };
 
 struct App {
     const char* name;
@@ -29,7 +29,6 @@ static const App APPS[] = {
     {"Flow",     &col::bad,    G_FOCUS,   appFlow},
     {"Status",   &col::good,   G_STATUS,  appStatus},
     {"Breathe",  &col::trace,  G_BREATHE, appBreathe},
-    // {"Music",    &col::warn,   G_MUSIC,   nullptr},   // hidden until the Music app is ready
 };
 static const int APP_COUNT = sizeof(APPS) / sizeof(APPS[0]);
 static const int COLS = 4;
@@ -117,13 +116,6 @@ static void drawGlyph(Glyph g, int cx, int cy, uint16_t ink) {
             canvas.fillArc(cx, cy, 11, 12, 0, 360, ink);
             canvas.fillArc(cx, cy, 6, 7, 0, 360, ink);
             canvas.fillCircle(cx, cy, 2, ink);
-            break;
-        case G_MUSIC:
-            line(cx - 3, cy + 8, cx - 3, cy - 10);
-            line(cx - 3, cy - 10, cx + 8, cy - 12);
-            line(cx + 8, cy - 12, cx + 8, cy + 6);
-            canvas.fillEllipse(cx - 6, cy + 8, 4, 3, ink);
-            canvas.fillEllipse(cx + 5, cy + 6, 4, 3, ink);
             break;
     }
 }
