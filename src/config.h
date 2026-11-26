@@ -4,7 +4,7 @@
 // Firmware name and version, shown on the start-up screen and in the menu.
 #define FW_NAME    "milliWorks"
 // Set by tools/release.sh: "19-beta.1" for a test build (pre-release), "19" when stable.
-#define FW_VERSION "18"
+#define FW_VERSION "19-beta.1"
 // Original author, shown on the About screen (vlka = vlkadusumilli, see NOTICE).
 // Apache 2.0: keep this credit and the NOTICE file when you build on it.
 #define FW_AUTHOR  "vlka"
