@@ -13,7 +13,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-REPO="vlkadusumilli/milliworks-cardputer"
+REPO="vlkadusumilli/milliworks-cardputer-adv"
 SLOT_KB=1088                       # the Launcher slot milliWorks fits today (rounded to 64 KB)
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
