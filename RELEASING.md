@@ -49,7 +49,7 @@ through this list. Anything wrong: fix it, push, and make the next beta (`beta 1
 gives `v19-beta.2`).
 
 **Start-up**
-- [ ] The splash shows `v19-beta.N`. **Settings → About** says `Version 19-beta.N` and *by vlka*.
+- [ ] The splash shows `v19-beta.N`. **Settings → About** says `Version 19-beta.N` and *by Milli Labs*.
 - [ ] With the SD card in: `/milliWorks` has `settings`, `breathe/voices`, `flow`, `music`.
 - [ ] The Clock shows a time straight away, then the right time once Wi-Fi connects.
 

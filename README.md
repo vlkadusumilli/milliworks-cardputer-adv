@@ -1,6 +1,6 @@
 # milliWorks for the M5Stack Cardputer ADV
 
-*By [vlkadusumilli](https://github.com/vlkadusumilli) (vlka)*
+*By **Milli Labs** ([vlkadusumilli](https://github.com/vlkadusumilli))*
 
 A small, friendly set of apps for the **M5Stack Cardputer ADV**: a clock that keeps time
 without waiting for the internet, a focus timer with calming sounds, a status light for
@@ -221,12 +221,12 @@ own projects and products. When you fork or redistribute it, you must:
 - mark the files you changed;
 - include the license.
 
-The About screen's "by vlka" credit (`FW_AUTHOR` in `config.h`) is part of that attribution.
+The About screen's "by Milli Labs" credit (`FW_AUTHOR` in `config.h`) is part of that attribution.
 Keep it, or add your name next to it.
 
 ## Credits
 
-- milliWorks is created by [vlkadusumilli](https://github.com/vlkadusumilli).
+- milliWorks is created by Milli Labs ([vlkadusumilli](https://github.com/vlkadusumilli)).
 
 - Built on [M5Unified](https://github.com/m5stack/M5Unified), [M5GFX](https://github.com/m5stack/M5GFX) and [M5Cardputer](https://github.com/m5stack/M5Cardputer).
 - Voices Luna and Julian were generated with Seed Audio (ByteDance) through Higgsfield.
