@@ -140,7 +140,7 @@ page to get your own copy, then:
 
 ```cpp
 #define FW_NAME    "milliWorks"     // start-up screen, welcome tour, settings file
-#define FW_VERSION "17"
+#define FW_VERSION "18"
 #define MW_DIR     "/milliWorks"    // the app's folder on the SD card
 #define PREFS_NS   "cardputer"      // where settings are kept in flash
 ```
@@ -177,7 +177,7 @@ are drawn in `drawGlyph`, so reuse one or add your own.
 themes with matching sounds (`playSfx`), Wi-Fi, NTP time, the SD card (`sdMount`) and the
 LED (`status.h`). Try every change in the Mac simulator before putting it on the device.
 
-**Space.** Launcher gives each firmware a slot rounded up to 64 KB. milliWorks v17 is
+**Space.** Launcher gives each firmware a slot rounded up to 64 KB. milliWorks v18 is
 1086 KB, which fits a 1088 KB slot; going over moves it to the next size up.
 
 ## Build it yourself

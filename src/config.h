@@ -3,7 +3,7 @@
 
 // Firmware name and version, shown on the start-up screen and in the menu.
 #define FW_NAME    "milliWorks"
-#define FW_VERSION "17"
+#define FW_VERSION "18"
 // Original author, shown on the About screen (vlka = vlkadusumilli, see NOTICE).
 // Apache 2.0: keep this credit and the NOTICE file when you build on it.
 #define FW_AUTHOR  "vlka"
