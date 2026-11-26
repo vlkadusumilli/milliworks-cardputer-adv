@@ -47,9 +47,17 @@ std::vector<String> voiceList() {
 String voiceSaved() {
     Preferences p;
     p.begin(PREFS_NS, true);
-    String v = p.getString("voice", "samantha");
+    String v = p.getString("voice", "");
     p.end();
     return v;
+}
+
+String voiceChosen() {
+    std::vector<String> list = voiceList();
+    String want = voiceSaved();
+    for (auto& v : list) if (v == want) return v;
+    for (auto& v : list) if (v == VOICE_DEFAULT) return v;
+    return list.size() > 1 ? list[1] : String(VOICE_BUILTIN_NAME);
 }
 
 void voiceSetSaved(const String& name) {
@@ -64,14 +72,14 @@ void voiceSetSaved(const String& name) {
 static uint8_t header[4096];
 static bool loadWav(const String& path, int16_t*& data, uint32_t& len, uint32_t& rate) {
     File f = SD.open(path);
-    if (!f) return false;
+    if (!f) { Serial.printf("voice: can't open %s\n", path.c_str()); return false; }
     size_t n = f.read(header, sizeof(header));
     WavInfo w;
-    if (!parseWavHeader(header, n, w)) { f.close(); return false; }
+    if (!parseWavHeader(header, n, w)) { f.close(); Serial.printf("voice: not a 16-bit WAV: %s\n", path.c_str()); return false; }
     len = min((uint32_t)(w.dataBytes / (2 * w.channels)), MAX_SAMPLES);
     rate = w.rate;
     data = (int16_t*)malloc(len * 2);
-    if (!data) { f.close(); return false; }
+    if (!data) { f.close(); Serial.printf("voice: no memory for %s\n", path.c_str()); return false; }
     f.seek(w.dataOffset);
     for (uint32_t i = 0; i < len; i++) {
         int16_t s = 0, r = 0;

@@ -80,11 +80,13 @@ static void about() {
 static void chooseVoice() {
     std::vector<String> voices = voiceList();
     int cur = 0;
-    for (size_t i = 0; i < voices.size(); i++) if (voices[i] == voiceSaved()) cur = i;
+    String now = voiceChosen();
+    for (size_t i = 0; i < voices.size(); i++) if (voices[i] == now) cur = i;
     int pick = pickFromList("Breathe voice", voices, cur);
     if (pick < 0) return;
     voiceSetSaved(voices[pick]);
-    voiceLoad(voices[pick]);                    // hear it: "Breathe in"
+    if (!voiceLoad(voices[pick]) && voices[pick] != VOICE_BUILTIN_NAME)   // hear it: "In"
+        toast((String("Can't read ") + voices[pick]).c_str(), col::warn, 1500);
     voicePlay(0);
     delay(voiceMillis(0) + 150);
     voiceUnload();
@@ -99,7 +101,7 @@ void appSettings() {
             String("Brightness: ") + String(screenBrightness() * 100 / 255) + "%",
             String("Sounds: ") + (soundsOn() ? soundPackName() : "off"),
             String("Sound volume: ") + String(soundVolume() * 100 / 255) + "%",
-            String("Breathe voice: ") + voiceSaved(),
+            String("Breathe voice: ") + voiceChosen(),
             "Save settings to SD card",
             "Load settings from SD card",
             "Flip screen",

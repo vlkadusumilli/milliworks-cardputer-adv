@@ -80,13 +80,13 @@ static void speak(int idx, bool music) {
     if (music) { focusSoundDuck(true); duckUntil = millis() + voiceMillis(phase) + 150; }
 }
 
-// The chosen voice comes from the SD card; if it isn't there, the small built-in voice
-// plays instead (said once), so voice guidance always works.
+// The voice comes from the SD card (voiceChosen: your pick, else luna, else any voice there).
+// If it can't be read, the small built-in voice plays instead and the screen says why.
 static bool toldBuiltin = false;
 static bool ensureVoice() {
-    String want = voiceSaved();
+    String want = voiceChosen();
     if (voiceLoaded() || want == VOICE_BUILTIN_NAME || voiceLoad(want)) return true;
-    if (!toldBuiltin) { toast("Using the built-in voice", col::accent, 1300); toldBuiltin = true; }
+    if (!toldBuiltin) { toast((String("Can't read ") + want + ": built-in voice").c_str(), col::warn, 1800); toldBuiltin = true; }
     return true;
 }
 

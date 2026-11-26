@@ -28,6 +28,8 @@
 #define VOICE_DIR    BREATHE_DIR "/voices"
 #define FLOW_DIR     MW_DIR "/flow"
 #define MUSIC_DIR    MW_DIR "/music"
+// Breathe voice used until you pick one (if it's on the card; otherwise the first voice there).
+#define VOICE_DEFAULT "luna"
 
 // Name used for saved settings in flash (the ESP32 "Preferences" storage).
 #define PREFS_NS "cardputer"

@@ -7,7 +7,9 @@
 
 extern const char* VOICE_BUILTIN_NAME; // "Built-in": the small voice inside the firmware
 std::vector<String> voiceList();      // "Built-in" first, then the folders found on the card
-String voiceSaved();                  // the chosen voice (default "samantha")
+String voiceSaved();                  // what was picked in Settings ("" = nothing yet)
+String voiceChosen();                 // the voice to use: the pick if it's on the card, else
+                                      // VOICE_DEFAULT, else the first voice there, else Built-in
 void voiceSetSaved(const String& name);
 
 bool voiceLoad(const String& name);   // reads an SD voice into memory; false = the built-in one plays

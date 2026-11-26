@@ -6,6 +6,8 @@ when the release becomes stable.
 
 ## Unreleased
 
+- Breathe: uses the voice on your SD card straight away. Before, it looked for an old voice (Samantha) until you picked one in Settings, and quietly played the small built-in voice without counting. Now it uses **luna** if it's on the card, or else the first voice it finds.
+- Breathe and Settings say so on screen if a voice on the card can't be read, instead of switching to the built-in voice without telling you.
 - Release path: test builds (pre-releases such as `v19-beta.1`) come before each stable release. See [RELEASING.md](RELEASING.md).
 - About screen: long version numbers (like `19-beta.1`) shrink to fit.
 
