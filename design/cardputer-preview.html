@@ -1,0 +1,959 @@
+<title>milliWorks on Cardputer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&family=Share+Tech+Mono&display=swap">
+<style>
+/* Layout: one column. Title, version toggle + screen chips, the device itself, then every screen v5 vs milliWorks in pairs. */
+:root {
+  --bg: #EEF2EF; --surface: #E0E7E2; --line: #C9D4CD; --fg: #111B16; --muted: #4F6158; --accent: #9C4E1C; --on-accent: #FFFFFF;
+  --font-ui: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "Share Tech Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B110E; --surface: #151F1A; --line: #263A30; --fg: #ECF2EE; --muted: #8EA197; --accent: #E3894A; --on-accent: #0D1512; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0B110E; --surface: #151F1A; --line: #263A30; --fg: #ECF2EE; --muted: #8EA197; --accent: #E3894A; --on-accent: #0D1512; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--font-ui); }
+.page { max-width: 960px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font: 12px/1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 }
+h1 { font: 600 clamp(26px, 4vw, 36px)/1.1 var(--font-ui); margin: 6px 0 8px; text-wrap: balance }
+.lede { margin: 0; max-width: 62ch; color: var(--muted) }
+h2 { font: 600 20px/1.2 var(--font-ui); margin: 0 }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; padding: 3px; gap: 3px; background: var(--surface) }
+.seg button, .chips button { font: 600 13px/1 var(--font-ui); border: 0; cursor: pointer; color: var(--fg); background: transparent; border-radius: 6px; padding: 8px 12px }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent) }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chips button { border: 1px solid var(--line); background: var(--bg); padding: 7px 10px; font-weight: 400 }
+.chips button[aria-current="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600 }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+/* ---- the device (fixed colours: it is a physical object) ---- */
+.device-wrap { container-type: inline-size; width: 100%; max-width: 860px; margin: 0 auto }
+.device { position: relative; width: 100%; aspect-ratio: 100 / 64; background: #2A2E2D; border-radius: 3.2cqw;
+  box-shadow: inset 0 0 0 .35cqw #3A403E, 0 1.2cqw 3cqw rgba(0,0,0,.35) }
+.bezel { position: absolute; left: 3cqw; top: 3cqw; width: 58cqw; padding: 1.6cqw; background: #101312; border-radius: 1.6cqw;
+  box-shadow: inset 0 0 0 .2cqw #050606 }
+.bezel canvas { display: block; width: 100%; aspect-ratio: 240 / 135; image-rendering: pixelated; border-radius: .3cqw }
+.side { position: absolute; left: 65cqw; top: 3.4cqw; right: 3cqw; height: 32cqw; display: flex; flex-direction: column; gap: 1.6cqw }
+.grille { flex: 1; border-radius: 1.4cqw; background:
+  radial-gradient(circle, #121514 0 .45cqw, transparent .5cqw) 0 0 / 2.1cqw 2.1cqw, #232726 }
+.side-row { display: flex; gap: 1.4cqw; align-items: center; font: 1.5cqw/1 var(--font-mono); color: #8B938F }
+.led { width: 1.2cqw; height: 1.2cqw; border-radius: 50%; background: #3DDC84; box-shadow: 0 0 .9cqw #3DDC84 }
+.rgb { width: 1.5cqw; height: 1.5cqw; border-radius: 50%; background: #2B2F2E; box-shadow: inset 0 0 0 .15cqw #1A1D1C; margin-left: 1.2cqw; transition: background .3s, box-shadow .3s }
+.rgb.on { background: var(--led); box-shadow: 0 0 1.2cqw .3cqw var(--led), 0 0 3cqw .6cqw color-mix(in srgb, var(--led) 45%, transparent) }
+.rgb.breathe { animation: breathe 3.2s ease-in-out infinite }
+@keyframes breathe { 0%, 100% { filter: brightness(.45) } 50% { filter: brightness(1.15) } }
+@media (prefers-reduced-motion: reduce) { .rgb.breathe { animation: none } }
+.g0 { width: 3.4cqw; height: 2cqw; border-radius: .6cqw; background: #C9773D }
+.kbd { position: absolute; left: 3cqw; right: 3cqw; bottom: 3cqw; display: grid; grid-template-columns: repeat(14, 1fr); gap: .75cqw }
+.key { height: 5.4cqw; border-radius: .9cqw; background: #3B403F; box-shadow: inset 0 -.35cqw 0 #2C302F; color: #DDE3E0;
+  font: 1.55cqw/1 var(--font-mono); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3cqw; position: relative }
+.key small { font-size: 1.15cqw; color: #9AA4A0 }
+.key .arw { color: #E3894A; font-size: 1.3cqw }
+.key.wide { grid-column: span 1 }
+.key.on { background: #4A3426; box-shadow: inset 0 0 0 .25cqw #E3894A, inset 0 -.35cqw 0 #2C302F }
+
+.caption { display: grid; gap: 4px; max-width: 70ch; margin: 0 auto; text-align: left }
+.caption p { margin: 0 }
+.caption .what { color: var(--muted) }
+.tag { display: inline-block; font: 600 11px/1 var(--font-mono); padding: 4px 6px; border-radius: 4px; background: var(--surface); border: 1px solid var(--line); margin-right: 6px; vertical-align: 1px }
+
+/* ---- side by side ---- */
+.pairs { display: grid; gap: 18px }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start }
+.pair figure { margin: 0; display: grid; gap: 6px; min-width: 0 }
+.pair canvas { width: 100%; max-width: 480px; aspect-ratio: 240 / 135; image-rendering: pixelated; border-radius: 4px; outline: 1px solid var(--line) }
+.pair figcaption { font: 12px/1.4 var(--font-mono); color: var(--muted) }
+.pair .name { grid-column: 1 / -1; font: 600 15px/1.3 var(--font-ui); margin: 0 }
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font: 600 12px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.note { font-size: 13px; color: var(--muted); margin: 0 }
+@media (max-width: 560px) { .pair, .legend { grid-template-columns: 1fr } .legend span:last-child { display: none } }
+
+.sounds { display: grid; gap: 12px }
+.sound-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px }
+.snd { display: grid; gap: 4px; text-align: left; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 8px; padding: 10px 12px; cursor: pointer; font: 14px/1.3 var(--font-ui) }
+.snd strong { font-weight: 600 }
+.snd span { font: 12px/1.4 var(--font-mono); color: var(--muted) }
+.snd:hover { border-color: var(--accent) }
+.snd.playing { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent) }
+.snd-opts { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 13px; color: var(--muted) }
+.snd-opts label { display: inline-flex; gap: 6px; align-items: center }
+</style>
+
+<div class="page">
+  <header>
+    <p class="eyebrow">Cardputer ADV · 240 × 135 LCD · RGB565</p>
+    <h1>milliWorks on the Cardputer</h1>
+    <p class="lede">How the screens would look on the device in each milliWorks theme, next to today's firmware (v5). Colours are reduced to the LCD's 16-bit RGB565, the screen is drawn at its real 240 × 135 pixels and scaled up with hard pixels.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="themes" role="group" aria-label="Look"></div>
+    <div class="chips" id="chips" role="group" aria-label="Screen"></div>
+  </div>
+
+  <div class="device-wrap">
+    <div class="device">
+      <div class="bezel"><canvas id="lcd" width="240" height="135" aria-label="Cardputer screen preview"></canvas></div>
+      <div class="side" aria-hidden="true">
+        <div class="grille"></div>
+        <div class="side-row"><span class="led"></span>PWR<span class="rgb" id="rgbled"></span>LED<span style="flex:1"></span>G0<span class="g0"></span></div>
+      </div>
+      <div class="kbd" id="kbd" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="caption">
+    <p><span class="tag" id="cap-ver">Green mask</span><strong id="cap-name"></strong></p>
+    <p class="what" id="cap-note"></p>
+    <p class="note">Keys outlined in copper on the keyboard are the ones this screen responds to. On your keyboard: ← → change the screen, T cycles through the themes.</p>
+  </div>
+
+
+  <section class="sounds" aria-labelledby="snd-h">
+    <h2 id="snd-h">Sounds: <span id="snd-pack">Copper chime</span></h2>
+    <p class="note"><span id="snd-about"></span> Every theme has its own sound pack with the same eight moments; pick a theme above to switch packs. These are the Cardputer's own sounds, rendered from the firmware code and checked for clipping, clicks and level. Its speaker is small and bright, so on the device they sound thinner than on your laptop.</p>
+    <div class="snd-opts">
+      <label><input type="checkbox" id="snd-nav" checked> Play the matching sound when I switch screens here</label>
+      <label>Volume <input type="range" id="snd-vol" min="0" max="100" value="45"></label>
+    </div>
+    <div class="sound-grid" id="sound-grid"></div>
+    <h2 id="fsnd-h" style="margin-top:12px">Focus sounds (Flow app)</h2>
+    <p class="note">Generated on the Cardputer while you work, no music files needed; these loops are rendered from the same code. Start one, then press Mute (or M) to silence it instantly. On the device they fade out at the break.</p>
+    <div class="snd-opts" id="focus-sounds"></div>
+    <h2 style="margin-top:12px">Breathe guidance (eyes closed)</h2>
+    <p class="note">What tells you the phase without looking. Voice is the default: full quality from the SD card, or the small built-in copy when the card isn't there. Tones use three shapes: up, two taps, down. All are the firmware's own audio.</p>
+    <div class="snd-opts" id="guide-sounds"></div>
+  </section>
+
+  <section class="pairs" aria-labelledby="all-h">
+    <h2 id="all-h">Every screen, side by side</h2>
+    <div class="legend"><span>Today (v5)</span><span id="legend-right">milliWorks</span></div>
+    <div id="pairs" class="pairs"></div>
+  </section>
+</div>
+
+<script>
+// ---------- colours: RGB565 exactly as the LCD shows them ----------
+const c565 = v => `rgb(${Math.round(((v >> 11) & 31) * 255 / 31)},${Math.round(((v >> 5) & 63) * 255 / 63)},${Math.round((v & 31) * 255 / 31)})`;
+const PAL = {
+  v5: { label: "Today (v5)", bg: 0x0841, panel: 0x18E3, edge: 0x18E3, text: 0xFFFF, dim: 0x8410, accent: 0x2D7F, onAccent: 0xFFFF,
+        good: 0x2E89, warn: 0xFD20, bad: 0xF8A2, icons: [0x07FF, 0x2D7F, 0x2E89], toastText: 0xFFFF, hideHeaderClockOnClock: false },
+  device: { label: "Green mask", bg: 0x0040, panel: 0x1123, edge: 0x2205, text: 0xF7FF, dim: 0xA5F6, accent: 0xFC47, onAccent: 0x0040,
+        good: 0x3F0F, warn: 0xFE07, bad: 0xFAC9, icons: [0x3E9D, 0xFC47, 0xC53F], toastText: 0x0040, hideHeaderClockOnClock: true },
+  daylight: { label: "Daylight", bg: 0xEF9D, panel: 0xE73C, edge: 0xCEB9, text: 0x10C2, dim: 0x4B0B, accent: 0x9A63, onAccent: 0xFFFF,
+        good: 0x0A65, warn: 0x7280, bad: 0xA964, icons: [0x138F, 0x9A63, 0x5A16], toastText: 0xFFFF, hideHeaderClockOnClock: true },
+  blackmask: { label: "Black mask", bg: 0x0841, panel: 0x18C3, edge: 0x2966, text: 0xF79D, dim: 0x9CD2, accent: 0xDD89, onAccent: 0x0841,
+        good: 0x5E31, warn: 0xF447, bad: 0xF34B, icons: [0x65BB, 0xDD89, 0xBD1D], toastText: 0x0841, hideHeaderClockOnClock: true },
+  purplemask: { label: "Purple mask", bg: 0x1884, panel: 0x20C6, edge: 0x394A, text: 0xF77E, dim: 0xACD7, accent: 0xE5CB, onAccent: 0x1884,
+        good: 0x6692, warn: 0xF509, bad: 0xFBCE, icons: [0x5E5B, 0xE5CB, 0xF4D8], toastText: 0x1884, hideHeaderClockOnClock: true },
+  phosphor: { label: "Phosphor", bg: 0x1060, panel: 0x18A0, edge: 0x3941, text: 0xFDA8, dim: 0xBC06, accent: 0xFDA8, onAccent: 0x1060,
+        good: 0xFF15, warn: 0xFCA6, bad: 0xFB47, icons: [0xFE91, 0xFDA8, 0xED2B], toastText: 0x1060, hideHeaderClockOnClock: true },
+  contrast: { label: "High contrast", bg: 0x0000, panel: 0x10A2, edge: 0x5ACB, text: 0xFFFF, dim: 0xD6BA, accent: 0xFEA0, onAccent: 0x0000,
+        good: 0x4F91, warn: 0xFD80, bad: 0xFB0C, icons: [0x5E9F, 0xFEA0, 0xD5DF], toastText: 0x0000, hideHeaderClockOnClock: true },
+};
+const F = {
+  body: '12px "IBM Plex Sans", sans-serif', cap: '8px "IBM Plex Mono", monospace', capB: '600 8px "IBM Plex Mono", monospace',
+  fig: '22px "IBM Plex Sans", sans-serif', clock: '48px "Share Tech Mono", monospace', small: '11px "IBM Plex Sans", sans-serif',
+};
+
+// ---------- drawing helpers (mirror src/ui.cpp) ----------
+function rr(x, y, w, h, r) { this.beginPath(); this.roundRect ? this.roundRect(x, y, w, h, r) : this.rect(x, y, w, h); }
+function make(ctx, P) {
+  const col = k => c565(P[k]);
+  const fill = (k, x, y, w, h, r = 0) => { ctx.fillStyle = typeof k === "number" ? c565(k) : col(k); if (r) { rr.call(ctx, x, y, w, h, r); ctx.fill(); } else ctx.fillRect(x, y, w, h); };
+  const text = (s, x, y, font, k, align = "left", base = "middle") => { ctx.font = font; ctx.fillStyle = typeof k === "number" ? c565(k) : col(k); ctx.textAlign = align; ctx.textBaseline = base; ctx.fillText(s, x, y); };
+  return {
+    col, fill, text,
+    ground() { fill("bg", 0, 0, 240, 135); },
+    header(title, clock = true) {
+      fill("panel", 0, 0, 240, 16);
+      text(title, 4, 8.5, F.body, "text");
+      if (clock) text("14:05", 196, 8.5, F.body, "text", "right");
+      ctx.fillStyle = col("good"); ctx.beginPath(); ctx.arc(206, 8, 3, 0, 7); ctx.fill();
+      ctx.strokeStyle = col("text"); ctx.lineWidth = 1; ctx.strokeRect(214.5, 3.5, 19, 9);
+      fill("text", 234, 6, 2, 4); fill("good", 216, 5, Math.round(16 * .72), 6);
+    },
+    hints(pairs) {
+      ctx.font = F.capB; const y = 125, gap = 7;
+      const widths = pairs.map(([k, l]) => { ctx.font = F.capB; const kw = ctx.measureText(k).width + 4; ctx.font = F.cap; return [kw, ctx.measureText(l).width]; });
+      let x = Math.max(0, Math.round((240 - widths.reduce((a, [kw, lw]) => a + kw + 3 + lw + gap, 0) + gap) / 2));
+      pairs.forEach(([k, l], i) => {
+        const [kw, lw] = widths[i];
+        fill("panel", x, y - 1, kw, 10, 2); text(k, x + 2, y, F.capB, "text", "left", "top");
+        x += kw + 3; text(l, x, y, F.cap, "dim", "left", "top"); x += lw + gap;
+      });
+    },
+    list(items, sel, top = 20) {
+      items.forEach((s, i) => {
+        const y = top + i * 18;
+        if (i === sel) fill("accent", 2, y, 236, 17, 4);
+        text(s, 8, y + 9, F.body, i === sel ? "onAccent" : "text");
+      });
+    },
+  };
+}
+
+
+// ---------- app glyphs for the icon grid (simple shapes, drawn in the ground colour) ----------
+function drawGlyph(ctx, g, cx, cy, ink) {
+  ctx.save(); ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  const arc = (r, a0, a1) => { ctx.beginPath(); ctx.arc(cx, cy + 6, r, a0, a1); ctx.stroke(); };
+  if (g === "wifi") { [5, 10, 15].forEach(r => arc(r, -Math.PI * .78, -Math.PI * .22)); ctx.beginPath(); ctx.arc(cx, cy + 6, 1.8, 0, 7); ctx.fill(); }
+  if (g === "clock") { ctx.beginPath(); ctx.arc(cx, cy, 11, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - 7); ctx.moveTo(cx, cy); ctx.lineTo(cx + 5, cy + 2); ctx.stroke(); }
+  if (g === "sd") { ctx.beginPath(); ctx.moveTo(cx - 8, cy - 12); ctx.lineTo(cx + 4, cy - 12); ctx.lineTo(cx + 9, cy - 7); ctx.lineTo(cx + 9, cy + 12); ctx.lineTo(cx - 8, cy + 12); ctx.closePath(); ctx.stroke();
+    for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(cx - 4 + i * 3.5, cy - 8); ctx.lineTo(cx - 4 + i * 3.5, cy - 3); ctx.stroke(); } }
+  if (g === "gear") { ctx.beginPath(); ctx.arc(cx, cy, 7, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, 7); ctx.fill();
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * 8, cy + Math.sin(a) * 8); ctx.lineTo(cx + Math.cos(a) * 12, cy + Math.sin(a) * 12); ctx.stroke(); } }
+  if (g === "remote") { rr.call(ctx, cx - 6, cy - 9, 12, 22, 3); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy - 3, 2, 0, 7); ctx.fill();
+    [[-2.5, 4], [2.5, 4], [-2.5, 8], [2.5, 8]].forEach(([dx, dy]) => { ctx.beginPath(); ctx.arc(cx + dx, cy + dy, 1, 0, 7); ctx.fill(); });
+    ctx.beginPath(); ctx.arc(cx, cy - 11, 4, -Math.PI * .8, -Math.PI * .2); ctx.stroke(); }
+  if (g === "focus") { ctx.beginPath(); ctx.arc(cx, cy + 1, 10, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy + 1, 4, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx, cy - 9); ctx.lineTo(cx, cy - 13); ctx.stroke(); }
+  if (g === "breathe") { ctx.beginPath(); ctx.arc(cx, cy, 11.5, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, 6.5, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, 2, 0, 7); ctx.fill(); }
+  if (g === "status") { ctx.beginPath(); ctx.arc(cx, cy, 11, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx - 6, cy); ctx.lineTo(cx + 6, cy); ctx.lineWidth = 3.5; ctx.stroke(); ctx.lineWidth = 2; }
+  if (g === "wave") { ctx.beginPath(); ctx.moveTo(cx - 12, cy); for (let x = -12; x <= 12; x += 2) ctx.lineTo(cx + x, cy + Math.sin(x / 2.5) * (6 - Math.abs(x) / 3)); ctx.stroke(); }
+  if (g === "mute") { ctx.beginPath(); ctx.moveTo(cx - 10, cy - 4); ctx.lineTo(cx - 5, cy - 4); ctx.lineTo(cx + 1, cy - 10); ctx.lineTo(cx + 1, cy + 10); ctx.lineTo(cx - 5, cy + 4); ctx.lineTo(cx - 10, cy + 4); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx + 5, cy - 5); ctx.lineTo(cx + 12, cy + 5); ctx.moveTo(cx + 12, cy - 5); ctx.lineTo(cx + 5, cy + 5); ctx.stroke(); }
+  if (g === "spark") { [[0, -13, 0, 13], [-13, 0, 13, 0], [-8, -8, 8, 8], [8, -8, -8, 8]].forEach(([a, b, c, e], k) => { ctx.lineWidth = k < 2 ? 3 : 2; ctx.beginPath(); ctx.moveTo(cx + a * (k < 2 ? 1 : .8), cy + b * (k < 2 ? 1 : .8)); ctx.lineTo(cx + c * (k < 2 ? 1 : .8), cy + e * (k < 2 ? 1 : .8)); ctx.stroke(); }); ctx.lineWidth = 2; }
+  if (g === "timer") { ctx.beginPath(); ctx.arc(cx, cy + 2, 10, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx - 4, cy - 12); ctx.lineTo(cx + 4, cy - 12); ctx.moveTo(cx, cy - 12); ctx.lineTo(cx, cy - 8); ctx.moveTo(cx, cy + 2); ctx.lineTo(cx + 5, cy - 3); ctx.stroke(); }
+  if (g === "music") { ctx.beginPath(); ctx.moveTo(cx - 3, cy + 8); ctx.lineTo(cx - 3, cy - 10); ctx.lineTo(cx + 8, cy - 12); ctx.lineTo(cx + 8, cy + 6); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx - 6, cy + 8, 3.5, 2.8, -.3, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(cx + 5, cy + 6, 3.5, 2.8, -.3, 0, 7); ctx.fill(); }
+  ctx.restore();
+}
+
+
+// Progress dots for the onboarding: the current step is a copper pill.
+function obDots(d, step, y = 119, total = 7) {
+  const gap = 8; let x = 120 - ((total - 1) * gap + 8) / 2;
+  for (let i = 0; i < total; i++) {
+    if (i === step) { d.fill("accent", x - 3, y - 2, 12, 4, 2); x += 14; }
+    else { d.fill(i < step ? "dim" : "edge", x, y - 2, 4, 4, 2); x += gap; }
+  }
+}
+
+
+// ---------- Pocket Claude helpers ----------
+// Word-wraps text to a width; returns the lines.
+function wrap(ctx, text, font, width) {
+  ctx.font = font; const out = []; let line = "";
+  text.split(" ").forEach(w => { const t = line ? line + " " + w : w; if (ctx.measureText(t).width > width && line) { out.push(line); line = w; } else line = t; });
+  if (line) out.push(line); return out;
+}
+// A speech bubble: yours on the right (panel), Claude's on the left (no fill).
+function bubble(d, text, y, mine) {
+  const ctx = d._ctx, lines = wrap(ctx, text, F.body, 180); ctx.font = F.body;
+  const w = Math.min(196, Math.max(...lines.map(l => ctx.measureText(l).width)) + 14), h = lines.length * 14 + 6;
+  const x = mine ? 236 - w : 4;
+  if (mine) d.fill("panel", x, y, w, h, 6);
+  lines.forEach((l, i) => d.text(l, x + 7, y + 10 + i * 14, F.body, mine ? "text" : "text"));
+  return y + h + 4;
+}
+// The small square app icon with its glyph, at any size.
+function miniIcon(d, glyph, hue, x, y, size = 18) {
+  d.fill(hue, x, y, size, size, Math.round(size / 4));
+  const ctx = d._ctx; ctx.save(); ctx.translate(x + size / 2, y + size / 2); ctx.scale(size / 34, size / 34);
+  drawGlyph(ctx, glyph, 0, 0, d.col("bg")); ctx.restore();
+}
+function pcObDots(d, step) { obDots(d, step, 119, 5); }
+
+// ---------- the screens ----------
+const SCREENS = [
+  // ---------- Settings on the SD card + voice from the SD card ----------
+  { id: "sd1", name: "SD 1 Settings", keys: [";", ".", "enter", "`"],
+    note: "Settings gets three new rows: the Breathe voice (folders found on the SD card), and saving or loading all milliWorks settings to the card, to move them to another Cardputer.",
+    draw(d, P) { d.ground(); d.header("Settings");
+      d.list(["Sound volume: 67%", "Voice: Samantha", "Save settings to SD card", "Load settings from SD card", "Show welcome again"], 2);
+      d.fill("dim", 237, 60, 2, 40);
+      d.hints([["↑↓", "move"], ["OK", "select"], ["ESC", "back"]]); } },
+  { id: "sd2", name: "SD 2 Passwords?", keys: ["enter", "`"],
+    note: "Saving asks about Wi-Fi passwords first. They're left out unless you say yes, because anyone with the card could read them. The Claude API key is never saved to the card.",
+    draw(d, P) { d.ground(); d.header("Save settings");
+      d.fill("panel", 8, 22, 224, 82, 6); const ctx = d._ctx; ctx.strokeStyle = d.col("warn"); rr.call(ctx, 8.5, 22.5, 223, 81, 6); ctx.stroke();
+      d.text("Include Wi-Fi passwords?", 120, 38, F.body, "text", "center");
+      d.text("Anyone with the card can read them.", 120, 58, F.cap, "dim", "center");
+      d.text("Network names are always saved.", 120, 70, F.cap, "dim", "center");
+      d.text("OK = include     ESC = leave out", 120, 92, F.cap, "dim", "center"); } },
+  { id: "sd3", name: "SD 3 Saved", keys: [],
+    note: "Done: one readable file on the card. It's written to a temporary file first and then swapped in, so a power cut can't leave a half-written file.",
+    draw(d, P) { d.ground(); d.header("Settings");
+      d.list(["Sound volume: 67%", "Voice: Samantha", "Save settings to SD card", "Load settings from SD card", "Show welcome again"], 2);
+      d.fill("good", 16, 40, 208, 50, 6);
+      d.text("Saved to the SD card", 120, 58, F.body, "bg", "center");
+      d.text("/milliWorks/settings/settings.json", 120, 75, F.cap, "bg", "center"); } },
+  { id: "sd4", name: "SD 4 Load", keys: ["enter", "`"],
+    note: "Loading shows what's in the file before anything changes: when and where it was saved, and the main settings.",
+    draw(d, P) { d.ground(); d.header("Load settings");
+      d.text("Found on the SD card:", 6, 26, F.cap, "dim");
+      [["Saved", "26 Nov 2026, 2:05 PM"], ["From", "Cardputer ADV, milliWorks v14"], ["Theme", "Green mask  (Copper chime)"], ["Time zone", "US Central (Chicago)"], ["Wi-Fi", "milli, iPhone  (no passwords)"]].forEach(([k, v], i) => {
+        d.text(k, 6, 40 + i * 13, F.cap, "dim"); d.text(v, 66, 40 + i * 13, F.cap, "text"); });
+      d.text("Replaces this Cardputer's settings.", 6, 108, F.cap, "warn");
+      d.hints([["OK", "load"], ["ESC", "cancel"]]); } },
+  { id: "sd5", name: "SD 5 First start", keys: [";", ".", "enter"],
+    note: "On a new Cardputer: if the card has milliWorks settings, the very first screen offers them, and the welcome tour skips everything already answered.",
+    draw(d, P) { d.ground();
+      d.text("Welcome to", 120, 22, F.body, "dim", "center");
+      d.text("milliWorks", 120, 42, '22px "IBM Plex Sans", sans-serif', "text", "center");
+      d.text("Found your settings on the SD card", 120, 62, F.cap, "accent", "center");
+      d.list(["Use them  (Green mask, US Central)", "Start fresh"], 0, 72);
+      d.hints([["↑↓", "choose"], ["OK", "go"]]); } },
+  { id: "sd6", name: "SD 6 Voice picker", keys: [";", ".", "enter", "`"],
+    note: "Built-in (small, inside the firmware) is always first; each folder in /milliWorks/breathe/voices/ on the card is another voice: another Mac voice, another language or your own recordings (in.wav, hold.wav, out.wav). Choosing one plays its 'Breathe in'.",
+    draw(d, P) { d.ground(); d.header("Breathe voice");
+      d.list(["Built-in", "samantha", "daniel  (en-GB)", "my-voice"], 1);
+      d.text("Built-in is inside the firmware; the rest are", 6, 98, F.cap, "dim");
+      d.text("folders in /milliWorks/breathe/voices/ on the SD card", 6, 110, F.cap, "dim");
+      d.hints([["↑↓", "listen"], ["OK", "choose"], ["ESC", "back"]]); } },
+  { id: "sd7", name: "SD 7 Built-in fallback", keys: [],
+    note: "If the card or the chosen voice's files are missing, Breathe says so once and uses the built-in voice, so voice guidance always works.",
+    draw(d, P) { d.ground(); d.header("Breathe");
+      const ctx = d._ctx; ctx.fillStyle = d.col("panel"); ctx.beginPath(); ctx.arc(46, 58, 34, 0, 7); ctx.fill();
+      d.fill("accent", 16, 45, 208, 44, 6);
+      d.text("Using the built-in voice", 120, 67, F.body, "onAccent", "center"); } },
+  // ---------- Breathe ----------
+  { id: "br1", name: "Breathe 1 Set up", keys: ["enter", ";", ".", ",", "/", "`"],
+    note: "Set up: pattern, length, Guidance (how you know the phase with your eyes closed: Voice, Tones or Silent) and Music. Changing Guidance plays it straight away. The description line sits below the circle so it always fits.",
+    draw(d, P) { d.ground(); d.header("Breathe");
+      const ctx = d._ctx; ctx.fillStyle = d.col("panel"); ctx.beginPath(); ctx.arc(46, 58, 34, 0, 7); ctx.fill();
+      ctx.fillStyle = c565(P.icons[0]); ctx.beginPath(); ctx.arc(46, 58, 22, 0, 7); ctx.fill();
+      [["Pattern", "Calm"], ["Length", "3 min"], ["Guidance", "Voice"], ["Music", "On"]].forEach(([k, v], i) => { const y = 21 + i * 19, on = i === 2;
+        if (on) d.fill("accent", 94, y, 142, 17, 4); d.text(k, 100, y + 9, F.body, on ? "onAccent" : "dim"); d.text(v, 230, y + 9, F.body, on ? "onAccent" : "text", "right"); });
+      d.text("Voice says: in, hold, out", 6, 110, F.cap, "dim");
+      d.hints([["OK", "start"], ["←→", "change"], ["↑↓", "move"], ["ESC", "home"]]); }, led: null },
+  { id: "br2", name: "Breathe 2 Inhale", keys: ["m", "`"], led: { c: "#3C8CFF", breathe: true },
+    note: "Breathing in: a calm voice says 'Breathe in' (or three rising notes with Tones), the circle grows and the music swells. The LED gets brighter. Eyes closed, the voice is enough.",
+    draw(d, P) { d.ground();
+      const ctx = d._ctx; ctx.fillStyle = d.col("panel"); ctx.beginPath(); ctx.arc(52, 62, 42, 0, 7); ctx.fill();
+      ctx.fillStyle = c565(P.icons[0]); ctx.beginPath(); ctx.arc(52, 62, 30, 0, 7); ctx.fill();
+      d.text("Inhale", 104, 40, '20px "IBM Plex Sans", sans-serif', "text");
+      d.text("breathe in", 104, 62, F.body, "dim"); ctx.font = F.body; d.text("2", 104 + ctx.measureText("breathe in").width + 8, 62, F.body, "accent");
+      d.text("Calm  -  2:41 left", 104, 86, F.cap, "dim");
+      d.hints([["M", "mute"], ["ESC", "stop"]]); } },
+  { id: "br4", name: "Breathe 4 Hold", keys: ["m", "`"], led: { c: "#3C8CFF", breathe: true },
+    note: "Hold: the voice says 'Hold' (or two soft taps on one note with Tones) and the chord stays still.",
+    draw(d, P) { d.ground();
+      const ctx = d._ctx; ctx.fillStyle = d.col("panel"); ctx.beginPath(); ctx.arc(52, 62, 42, 0, 7); ctx.fill();
+      ctx.fillStyle = c565(P.icons[0]); ctx.beginPath(); ctx.arc(52, 62, 40, 0, 7); ctx.fill();
+      d.text("Hold", 104, 40, '20px "IBM Plex Sans", sans-serif', "text");
+      d.text("hold", 104, 62, F.body, "dim"); ctx.font = F.body; d.text("3", 104 + ctx.measureText("hold").width + 8, 62, F.body, "accent");
+      d.text("Calm  -  2:37 left", 104, 86, F.cap, "dim");
+      d.hints([["M", "mute"], ["ESC", "stop"]]); } },
+  { id: "br3", name: "Breathe 3 Exhale", keys: ["m", "`"], led: { c: "#3C8CFF", breathe: true },
+    note: "Breathing out: the voice says 'Breathe out' (or three falling notes with Tones), then the chord falls and fades. All text fits beside the circle.",
+    draw(d, P) { d.ground();
+      const ctx = d._ctx; ctx.fillStyle = d.col("panel"); ctx.beginPath(); ctx.arc(52, 62, 42, 0, 7); ctx.fill();
+      ctx.fillStyle = c565(P.icons[0]); ctx.beginPath(); ctx.arc(52, 62, 18, 0, 7); ctx.fill();
+      d.text("Exhale", 104, 40, '20px "IBM Plex Sans", sans-serif', "text");
+      d.text("breathe out", 104, 62, F.body, "dim"); ctx.font = F.body; d.text("4", 104 + ctx.measureText("breathe out").width + 8, 62, F.body, "accent");
+      d.text("Calm  -  2:33 left", 104, 86, F.cap, "dim");
+      d.hints([["M", "mute"], ["ESC", "stop"]]); } },
+  // ---------- Status: do not disturb sign + LED ----------
+  { id: "st1", name: "Status 1 Pick", keys: [";", ".", "enter", "`"], led: { c: "#FF3B30", breathe: true },
+    note: "The Status app: pick how you want to be seen. The LED already shows the highlighted colour.",
+    draw(d, P) { d.ground(); d.header("Status");
+      const rows = [["Do not disturb", "#FF3B30"], ["Focusing until 3:45 PM", "#FFB020"], ["In a meeting", "#3D8BFF"], ["Free, come in", "#34D058"], ["Off", null]];
+      d.list(rows.map(r => "     " + r[0]), 0);
+      rows.forEach(([t, c], i) => { const ctx = d._ctx, y = 29 + i * 18; if (c) { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(16, y, 4, 0, 7); ctx.fill(); }
+        else { ctx.strokeStyle = d.col("dim"); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(16, y, 3.5, 0, 7); ctx.stroke(); } });
+      d.hints([["↑↓", "choose"], ["OK", "show sign"], ["ESC", "home"]]); } },
+  { id: "st2", name: "Status 2 Do not disturb", keys: ["`", "enter"], led: { c: "#FF3B30", breathe: true },
+    note: "The sign, for the people around you: big, plain and red, with the LED breathing red. The screen stays dim so it's calm, not flashy. ESC or any key takes the sign down.",
+    draw(d, P) { const ctx = d._ctx; ctx.fillStyle = "#2A0504"; ctx.fillRect(0, 0, 240, 135);
+      ctx.fillStyle = "#FF3B30"; ctx.beginPath(); ctx.arc(120, 30, 14, 0, 7); ctx.fill(); ctx.fillStyle = "#2A0504"; ctx.fillRect(110, 27, 20, 6);
+      d.text("Do not disturb", 120, 66, '24px "IBM Plex Sans", sans-serif', 0xFFFF, "center");
+      d.text("Back at 3:45 PM", 120, 92, F.body, 0xFD08, "center");
+      d.text("ESC  take the sign down", 120, 124, F.cap, 0x8A28, "center"); } },
+  { id: "st3", name: "Status 3 Focusing", keys: ["`"], led: { c: "#FFB020", breathe: false },
+    note: "Flow puts this up by itself during a session, with the time it ends. Amber means 'only if it's important'.",
+    draw(d, P) { const ctx = d._ctx; ctx.fillStyle = "#2A1A02"; ctx.fillRect(0, 0, 240, 135);
+      d.text("Focusing", 120, 46, '24px "IBM Plex Sans", sans-serif', 0xFFFF, "center");
+      d.text("18:42 left  -  essay intro", 120, 72, F.body, 0xFD84, "center");
+      d.text("Only if it's important", 120, 92, F.body, 0xBC06, "center");
+      d.text("set by Flow", 120, 124, F.cap, 0x8C42, "center"); } },
+  { id: "st4", name: "Status 4 Free", keys: ["`"], led: { c: "#34D058", breathe: false },
+    note: "Free: a steady green LED, and a friendly sign. Flow switches to this on breaks.",
+    draw(d, P) { const ctx = d._ctx; ctx.fillStyle = "#04200C"; ctx.fillRect(0, 0, 240, 135);
+      d.text("Free", 120, 50, '28px "IBM Plex Sans", sans-serif', 0xFFFF, "center");
+      d.text("Come in, say hi", 120, 80, F.body, 0x3E8B, "center");
+      d.text("ESC  take the sign down", 120, 124, F.cap, 0x3369, "center"); } },
+  // ---------- Flow: concentration app ----------
+  { id: "fl1", name: "Flow 1 Set up", keys: ["enter", ";", ".", ",", "/", "`"],
+    note: "Flow, before a session. On the Sound row the highlighted sound plays straight away; left/right switches sounds live and M mutes. It fades out when you move to another row, and carries on into the session if you start with it.",
+    draw(d, P) { d.ground(); d.header("Flow");
+      d.text("What are you working on?", 6, 26, F.cap, "dim");
+      const ctx = d._ctx; ctx.strokeStyle = d.col("edge"); ctx.lineWidth = 1; rr.call(ctx, 4.5, 32.5, 231, 19, 4); ctx.stroke();
+      d.text("essay intro", 10, 42, F.body, "text");
+      [["Length", "25 min"], ["Sound", "Brown noise"], ["Break", "5 min"]].forEach(([k, v], i) => {
+        const y = 56 + i * 19, sel = i === 1;
+        if (sel) d.fill("accent", 2, y, 236, 17, 4);
+        d.text(k, 10, y + 9, F.body, sel ? "onAccent" : "dim");
+        d.text("‹  " + v + "  ›", 230, y + 9, F.body, sel ? "onAccent" : "text", "right");
+        if (sel) { const ctx = d._ctx; ctx.font = F.body; const x = 214 - ctx.measureText("‹  " + v + "  ›").width;
+          [0, 1, 2].forEach(k => d.fill("onAccent", x + k * 4, y + 12 - (k + 1) * 3, 2, (k + 1) * 3)); } });
+      d.hints([["OK", "start"], ["←→", "listen"], ["M", "mute"], ["ESC", "home"]]); } },
+  { id: "fl2", name: "Flow 2 In flow", keys: ["m", "n", "d", "enter", "`"], led: { c: "#FF3B30", breathe: true },
+    note: "During the session. The sound chip shows what's playing. M mutes at any time, even on the dimmed screen; left/right switches to another sound without stopping the timer. N parks a thought, D counts a drift.",
+    draw(d, P) { d.ground();
+      d.text("essay intro", 120, 12, F.body, "dim", "center");
+      d.text("18:42", 120, 50, F.clock, "text", "center");
+      d.fill("edge", 20, 80, 200, 4, 2); d.fill("bad", 20, 80, Math.round(200 * 379 / 1500), 4, 2);
+      d.fill("panel", 6, 92, 104, 18, 9); miniIcon(d, "wave", P.icons[0], 9, 94, 14); d.text("Brown noise", 27, 101, F.cap, "text");
+      d.text("drifted 1   parked 2", 232, 101, F.cap, "dim", "right");
+      d.hints([["M", "mute"], ["←→", "sound"], ["N", "park"], ["D", "drift"], ["OK", "pause"]]); } },
+  { id: "fl2m", name: "Flow 2 Muted", keys: ["m"], led: { c: "#FF3B30", breathe: true },
+    note: "M again: the sound stops at once and the chip says so. M brings it back.",
+    draw(d, P) { d.ground();
+      d.text("essay intro", 120, 12, F.body, "dim", "center");
+      d.text("18:40", 120, 50, F.clock, "text", "center");
+      d.fill("edge", 20, 80, 200, 4, 2); d.fill("bad", 20, 80, Math.round(200 * 380 / 1500), 4, 2);
+      d.fill("panel", 6, 92, 104, 18, 9); miniIcon(d, "mute", P.dim, 9, 94, 14); d.text("Muted", 27, 101, F.cap, "dim");
+      d.text("drifted 1   parked 2", 232, 101, F.cap, "dim", "right");
+      d.hints([["M", "unmute"], ["←→", "sound"], ["N", "park"], ["D", "drift"], ["OK", "pause"]]); } },
+  { id: "fl3", name: "Flow 3 Park a thought", keys: ["enter", "fn", "`", "del"], led: { c: "#FF3B30", breathe: true },
+    note: "N opens this over the timer. Type the thought, OK parks it, and you're straight back. It's waiting for you at the break.",
+    draw(d, P) { d.ground();
+      d.text("18:31", 120, 30, '30px "Share Tech Mono", monospace', "dim", "center");
+      d.fill("panel", 8, 46, 224, 64, 6);
+      d.text("Park it, get back to work", 16, 57, F.cap, "dim");
+      const ctx = d._ctx; ctx.strokeStyle = d.col("accent"); ctx.lineWidth = 1; rr.call(ctx, 14.5, 64.5, 211, 19, 4); ctx.stroke();
+      d.text("email Sam about the deck", 20, 74, F.body, "text"); ctx.font = F.body; d.text("_", 20 + ctx.measureText("email Sam about the deck").width, 74, F.body, "accent");
+      d.text("saved to /milliWorks/flow/parked.txt", 16, 98, F.cap, "dim");
+      d.hints([["OK", "park"], ["Fn+ESC", "cancel"]]); } },
+  { id: "fl4", name: "Flow 4 Dimmed", keys: [], led: { c: "#FF3B30", breathe: true },
+    note: "Ten seconds without a key: only the time and a thin progress line stay, at low brightness. M still mutes from here (a small 'muted' appears); any other key brings everything back.",
+    draw(d, P) { d.ground();
+      d._ctx.globalAlpha = .45; d.text("18:20", 120, 62, F.clock, "dim", "center");
+      d.fill("bad", 20, 92, Math.round(200 * 400 / 1500), 2); d._ctx.globalAlpha = 1; } },
+  { id: "fl5", name: "Flow 5 Break", keys: ["enter", "s", "`"], led: { c: "#34D058", breathe: false },
+    note: "Break: a breathing guide (the circle grows and shrinks, in 4 s, hold 4, out 6) and your parked thoughts. The focus sound fades out.",
+    draw(d, P) { d.ground(); d.header("Break  4:12");
+      const ctx = d._ctx; ctx.fillStyle = d.col("panel"); ctx.beginPath(); ctx.arc(52, 66, 34, 0, 7); ctx.fill();
+      ctx.fillStyle = d.col("good"); ctx.globalAlpha = .9; ctx.beginPath(); ctx.arc(52, 66, 24, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+      d.text("in", 52, 66, F.body, "bg", "center");
+      d.text("Breathe in...", 52, 109, F.cap, "dim", "center");
+      d.text("Parked thoughts", 100, 26, F.cap, "dim");
+      ["email Sam about the deck", "look up citation style"].forEach((t, i) => { d.fill("panel", 98, 34 + i * 20, 138, 17, 4); d.text(t.length > 22 ? t.slice(0, 21) + "…" : t, 104, 43 + i * 20, F.cap, "text"); });
+      d.text("drifted 1x  -  that's fine", 100, 84, F.cap, "dim");
+      d.hints([["OK", "notes"], ["S", "skip break"], ["ESC", "end"]]); } },
+  { id: "fl6", name: "Flow 6 Summary", keys: ["enter", "`"],
+    note: "After the last session: what you did, without judgement. Today's total keeps adding up.",
+    draw(d, P) { d.ground(); d.header("Session done");
+      d.text("25", 40, 48, F.clock, "text", "center"); d.text("min in flow", 40, 80, F.cap, "dim", "center");
+      [["essay intro", "text"], ["drifted 1x", "dim"], ["parked 2 thoughts", "dim"], ["today: 50 min, 2 sessions", "good"]].forEach(([t, c], i) => d.text(t, 88, 32 + i * 16, F.body, c));
+      d.hints([["OK", "another"], ["N", "parked notes"], ["ESC", "home"]]); } },
+  // ---------- Pocket Claude: first open ----------
+  { id: "pc1", name: "PC 1 Meet", keys: ["enter"],
+    note: "Pocket Claude, first open, step 1 of 5. Typing first; Claude can also start timers and focus sessions on the Cardputer.",
+    draw(d, P) { d.ground();
+      miniIcon(d, "spark", P.accent, 106, 16, 28);
+      d.text("Pocket Claude", 120, 58, '22px "IBM Plex Sans", sans-serif', "text", "center");
+      d.text("Ask anything with the keyboard.", 120, 80, F.body, "dim", "center");
+      d.text("It can start timers and focus sessions too.", 120, 95, F.cap, "dim", "center");
+      pcObDots(d, 0); d.hints([["OK", "start"], ["ESC", "home"]]); } },
+  { id: "pc2", name: "PC 2 API key", keys: ["`", "enter"],
+    note: "Step 2: no typing the long key. The Cardputer shows a setup address; you open it on your phone or Mac and paste the key there. The key is kept in the Cardputer's internal memory, not on the SD card.",
+    draw(d, P) { d.ground(); d.header("Add your API key");
+      d.text("On your phone or Mac, open:", 6, 27, F.body, "dim");
+      d.fill("panel", 4, 36, 232, 24, 5); d.text("http://192.168.1.42", 120, 48, '15px "IBM Plex Mono", monospace', "accent", "center");
+      d.text("and paste your key. Nothing to type here.", 6, 70, F.cap, "dim");
+      d._ctx.fillStyle = d.col("warn"); d._ctx.beginPath(); d._ctx.arc(10, 88, 3, 0, 7); d._ctx.fill();
+      d.text("Waiting for the key...", 18, 88, F.body, "warn");
+      d.text("or put key.txt in /claude on the SD card", 6, 104, F.cap, "dim");
+      pcObDots(d, 1); d.hints([["ESC", "back"]]); } },
+  { id: "pc2b", name: "PC 2 Key checked", keys: ["enter"],
+    note: "After you press Save on your phone or Mac: the Cardputer checks the key with one tiny test call and shows only the last four characters.",
+    draw(d, P) { d.ground(); d.header("Add your API key");
+      const ctx = d._ctx; ctx.strokeStyle = d.col("good"); ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.beginPath(); ctx.moveTo(108, 30); ctx.lineTo(116, 38); ctx.lineTo(132, 22); ctx.stroke();
+      d.text("Key works", 120, 54, '22px "IBM Plex Sans", sans-serif', "text", "center");
+      d.text("sk-ant-...xxxx", 120, 76, '13px "IBM Plex Mono", monospace', "dim", "center");
+      d.text("Saved on this Cardputer, not on the SD card.", 120, 94, F.cap, "dim", "center");
+      pcObDots(d, 1); d.hints([["OK", "next"]]); } },
+  { id: "pc3", name: "PC 3 Model", keys: ["`", ";", ".", "enter"],
+    note: "Step 3: which Claude answers. Opus 5.5 is the default; Haiku 5.5 is the cheap, fast one. Changeable later.",
+    draw(d, P) { d.ground(); d.header("Choose Claude");
+      d.list(["Opus 5.5   best answers", "Haiku 5.5  fastest, cheapest"], 0, 22);
+      d.text("Opus: about 1 cent a question", 6, 70, F.cap, "dim");
+      d.text("Haiku: well under 0.1 cent", 6, 81, F.cap, "dim");
+      d.text("Change it any time in Pocket Claude > Settings.", 6, 96, F.cap, "dim");
+      pcObDots(d, 2); d.hints([["↑↓", "choose"], ["OK", "next"], ["ESC", "back"]]); } },
+  { id: "pc4", name: "PC 4 What it can do", keys: ["`", "enter"],
+    note: "Step 4: the two device tools in this first version, with things you can type.",
+    draw(d, P) { d.ground(); d.header("It can also...");
+      miniIcon(d, "timer", P.warn, 6, 24, 20); d.text("Timers", 32, 29, F.body, "text"); d.text('"tea in 4 minutes"', 32, 42, F.cap, "dim");
+      miniIcon(d, "focus", P.bad, 6, 56, 20); d.text("Focus sessions", 32, 61, F.body, "text"); d.text('"focus 25 min on my essay"', 32, 74, F.cap, "dim");
+      d.text("Each action shows on screen as it happens.", 120, 98, F.cap, "dim", "center");
+      pcObDots(d, 3); d.hints([["OK", "next"], ["ESC", "back"]]); } },
+  { id: "pc5", name: "PC 5 Ready", keys: ["enter"],
+    note: "Step 5: done. OK opens the Ask screen.",
+    draw(d, P) { d.ground();
+      const ctx = d._ctx; ctx.strokeStyle = d.col("good"); ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.beginPath(); ctx.moveTo(108, 30); ctx.lineTo(116, 38); ctx.lineTo(132, 22); ctx.stroke();
+      d.text("Ready", 120, 54, '22px "IBM Plex Sans", sans-serif', "text", "center");
+      d.text("Opus 5.5  -  key ...k3Fq", 120, 76, F.body, "dim", "center");
+      d.text("Type a question and press OK.", 120, 92, F.body, "dim", "center");
+      pcObDots(d, 4); d.hints([["OK", "start asking"]]); } },
+  // ---------- Pocket Claude: asking, with the timer and focus tools ----------
+  { id: "pc-ask", name: "PC Ask", keys: ["enter", "`", ";", "."],
+    note: "The Ask screen. Type straight away, or pick a suggestion with the arrows.",
+    draw(d, P) { d.ground(); d.header("Pocket Claude");
+      [["focus", P.bad, "Focus 25 min on my essay"], ["timer", P.warn, "Tea timer, 4 minutes"], ["spark", P.accent, "What can you do?"]].forEach(([g, hue, t], i) => {
+        const y = 22 + i * 22; d.fill("panel", 4, y, 232, 19, 5); miniIcon(d, g, hue, 8, y + 3, 13); d.text(t, 28, y + 10, F.body, "text"); });
+      const ctx = d._ctx; ctx.strokeStyle = d.col("accent"); ctx.lineWidth = 1; rr.call(ctx, 4.5, 94.5, 231, 21, 5); ctx.stroke();
+      d.text("_", 10, 105, F.body, "accent"); d.text("Ask anything", 20, 105, F.body, "dim");
+      d.hints([["OK", "send"], ["↑↓", "suggestion"], ["ESC", "home"]]); } },
+  { id: "pc-typing", name: "PC Typing", keys: ["enter", "del", "fn", "`"],
+    note: "Your question as you type it. OK sends it.",
+    draw(d, P) { d.ground(); d.header("Pocket Claude");
+      d.text("Recent", 6, 26, F.cap, "dim");
+      d.text("How do I boil an egg?", 6, 40, F.body, "dim");
+      const ctx = d._ctx; ctx.strokeStyle = d.col("accent"); ctx.lineWidth = 1; rr.call(ctx, 4.5, 72.5, 231, 43, 5); ctx.stroke();
+      const lines = wrap(ctx, "focus 25 min on my essay, then remind me to stretch", F.body, 214);
+      lines.forEach((l, i) => d.text(l, 12, 83 + i * 14, F.body, "text"));
+      ctx.font = F.body; d.text("_", 12 + ctx.measureText(lines[lines.length - 1]).width, 83 + (lines.length - 1) * 14, F.body, "accent");
+      d.hints([["OK", "send"], ["Del", "erase"], ["Fn+ESC", "cancel"]]); } },
+  { id: "pc-think", name: "PC Thinking", keys: ["`"],
+    note: "Waiting for Claude: three copper dots pulse. ESC cancels.",
+    draw(d, P) { d.ground(); d.header("Pocket Claude");
+      bubble(d, "focus 25 min on my essay, then remind me to stretch", 22, true);
+      [0, 1, 2].forEach(i => { d._ctx.fillStyle = d.col(i === 1 ? "accent" : "dim"); d._ctx.beginPath(); d._ctx.arc(14 + i * 10, 72, 3, 0, 7); d._ctx.fill(); });
+      d.text("Thinking", 46, 72, F.body, "dim");
+      d.hints([["ESC", "cancel"]]); } },
+  { id: "pc-action", name: "PC Actions", keys: [],
+    note: "Claude asked for two actions; the Cardputer does them and shows each one as it happens.",
+    draw(d, P) { d.ground(); d.header("Pocket Claude");
+      let y = bubble(d, "focus 25 min on my essay, then remind me to stretch", 22, true);
+      [["focus", P.bad, "Focus started", "25:00  essay"], ["timer", P.warn, "Timer set", "after focus  stretch"]].forEach(([g, hue, a, b], i) => {
+        const yy = y + 2 + i * 26; d.fill("panel", 4, yy, 232, 23, 5); miniIcon(d, g, hue, 8, yy + 3, 17);
+        d.text(a, 32, yy + 8, F.body, "text"); d.text(b, 32, yy + 18, F.cap, "dim");
+        const ctx = d._ctx; ctx.strokeStyle = d.col("good"); ctx.lineWidth = 2; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(214, yy + 12); ctx.lineTo(218, yy + 16); ctx.lineTo(226, yy + 7); ctx.stroke(); });
+      d.text("working...", 120, 129, F.cap, "dim", "center"); } },
+  { id: "pc-answer", name: "PC Answer", keys: ["enter", "`", ";", "."],
+    note: "Claude's reply, short for the small screen. OK opens the running focus session.",
+    draw(d, P) { d.ground(); d.header("Pocket Claude");
+      d.fill("panel", 4, 20, 232, 15, 4); miniIcon(d, "focus", P.bad, 7, 22, 11); d.text("Focus 25:00 essay   +   stretch reminder", 22, 28, F.cap, "text");
+      const ctx = d._ctx; wrap(ctx, "Done. You're in a 25-minute focus session on your essay. When it ends I'll chime and remind you to stretch.", F.body, 226)
+        .forEach((l, i) => d.text(l, 6, 46 + i * 14, F.body, "text"));
+      d.hints([["OK", "open focus"], ["↑↓", "scroll"], ["ESC", "ask more"]]); } },
+  { id: "pc-focus", name: "PC Focus running", keys: ["enter", "s", "r", "`"],
+    note: "The focus session Claude started, in the Focus app. The screen dims after 15 seconds; any key wakes it.",
+    draw(d, P) { d.ground(); d.header("Focus");
+      d.text("FOCUS", 8, 28, F.body, "bad"); d.text("essay", 62, 28, F.body, "dim");
+      d.text("Today: 2", 232, 28, F.body, "dim", "right");
+      [0, 1, 2, 3].forEach(i => { const cx = 120 + i * 12; d._ctx.fillStyle = d.col(i < 2 ? "bad" : "edge"); d._ctx.beginPath(); d._ctx.arc(cx, 28, 3.5, 0, 7); d._ctx.fill(); });
+      d.text("24:12", 120, 72, F.clock, "text", "center");
+      d.fill("edge", 10, 98, 220, 6, 3); d.fill("bad", 10, 98, Math.round(220 * 48 / 1500), 6, 3);
+      d.text("then: stretch", 120, 112, F.cap, "dim", "center");
+      d.hints([["OK", "pause"], ["S", "skip"], ["R", "reset"], ["ESC", "back"]]); } },
+  { id: "pc-done", name: "PC Timer done", keys: ["enter", "z", "`"],
+    note: "When a timer ends it takes over the screen with the theme's sound, whatever app is open. Z snoozes 5 minutes.",
+    draw(d, P) { d.ground();
+      d.fill("warn", 0, 0, 240, 4);
+      miniIcon(d, "timer", P.warn, 104, 14, 32);
+      d.text("Time's up", 120, 62, '22px "IBM Plex Sans", sans-serif', "text", "center");
+      d.text("stretch", 120, 84, F.body, "warn", "center");
+      d.text("set by Pocket Claude  -  2:45 PM", 120, 100, F.cap, "dim", "center");
+      d.hints([["OK", "stop"], ["Z", "snooze 5 min"]]); } },
+  { id: "splash", name: "Start-up", keys: [],
+    note: "Shown for about a second at power-on. The device line is detected, not fixed: an original Cardputer would read \"for Cardputer\".",
+    draw(d, P) { d.ground();
+      d.text("milliWorks", 120, 56, '26px "IBM Plex Sans", sans-serif', "text", "center");
+      d.text("for Cardputer ADV", 120, 82, F.body, "dim", "center");
+      d.text("v7", 120, 100, F.cap, "dim", "center"); } },
+  // ---------- onboarding: only on the very first start ----------
+  { id: "ob1", name: "1 Welcome", keys: ["enter"],
+    note: "Onboarding, step 1 of 7. Shown once, on the very first start. Dots show where you are; ESC always goes one step back.",
+    draw(d, P) { d.ground();
+      d.text("Welcome to", 120, 30, F.body, "dim", "center");
+      d.text("milliWorks", 120, 54, '26px "IBM Plex Sans", sans-serif', "text", "center");
+      d.text("for Cardputer ADV", 120, 78, F.body, "accent", "center");
+      obDots(d, 0); d.hints([["OK", "start"]]); } },
+  { id: "ob2", name: "2 Your keys", keys: ["`", "del", ";", ".", ",", "/", "enter"],
+    note: "Step 2: the three things you need, shown as the real key caps. You press the down arrow once to continue, so you've used it before you need it.",
+    draw(d, P) { d.ground(); d.header("Your keys");
+      const cap = (x, y, k, sub) => { d.fill("panel", x, y, 20, 24, 3); d.text(k, x + 10, y + 7, F.body, "text", "center"); if (sub) d.text(sub, x + 10, y + 18, F.cap, "accent", "center"); };
+      cap(10, 22, ";", "↑"); cap(34, 22, ".", "↓"); cap(58, 22, ",", "←"); cap(82, 22, "/", "→");
+      d.text("move", 110, 34, F.body, "dim");
+      d.fill("panel", 10, 52, 44, 18, 3); d.text("Enter", 32, 61, F.body, "text", "center"); d.text("open, choose", 62, 61, F.body, "dim");
+      d.fill("panel", 10, 76, 20, 18, 3); d.text("`", 20, 85, F.body, "text", "center"); d.text("or", 36, 85, F.cap, "dim");
+      d.fill("panel", 46, 76, 28, 18, 3); d.text("Del", 60, 85, F.body, "text", "center"); d.text("back", 82, 85, F.body, "dim");
+      d.fill("accent", 146, 46, 86, 46, 6); d.text("Try it:", 189, 60, F.body, "onAccent", "center"); d.text("press  .  ↓", 189, 78, F.body, "onAccent", "center");
+      obDots(d, 1); d.hints([["↓", "continue"], ["ESC", "back"]]); } },
+  { id: "ob3", name: "3 Pick a look", keys: ["`", ";", ".", "enter"],
+    note: "Step 3: the theme picker. Scrolling re-colours this very screen and plays the theme's sounds.",
+    draw(d, P) { d.ground(); d.header("Pick a look");
+      const ids = ["device", "daylight", "blackmask", "purplemask", "phosphor"];
+      const cur = Math.max(0, ids.indexOf(Object.keys(PAL).find(k => PAL[k] === P)));
+      d.list(ids.map(k => PAL[k].label), cur);
+      ids.forEach((k, r) => { const T = PAL[k], sw = [T.bg, T.panel, T.accent, T.icons[0], T.good]; const y = 24 + r * 18;
+        sw.forEach((c, j) => { const x = 170 + j * 12; d.fill(c, x, y, 10, 9); const ctx = d._ctx; ctx.strokeStyle = d.col("edge"); ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, 9, 8); }); });
+      obDots(d, 2); d.hints([["↑↓", "try"], ["OK", "next"], ["ESC", "back"]]); } },
+  { id: "ob4", name: "4 Sounds", keys: ["`", ";", ".", "enter"],
+    note: "Step 4: sounds on or off. With sounds on you hear the theme's pack straight away.",
+    draw(d, P) { d.ground(); d.header("Sounds");
+      d.text("Little sounds for keys and results.", 120, 30, F.body, "dim", "center");
+      d.list(["On  -  " + (PACKS[packId()] || PACKS.device).name, "Off"], 0, 46);
+      d.text("You can change this in Settings.", 120, 96, F.cap, "dim", "center");
+      obDots(d, 3); d.hints([["↑↓", "choose"], ["OK", "next"], ["ESC", "back"]]); } },
+  { id: "ob5", name: "5 Wi-Fi", keys: ["`", ";", ".", "enter"],
+    note: "Step 5: Wi-Fi gives the Clock its time. Skipping is fine; the Clock then asks you to set the time by hand.",
+    draw(d, P) { d.ground(); d.header("Wi-Fi");
+      d.text("Wi-Fi sets the clock for you.", 120, 30, F.body, "dim", "center");
+      d.list(["Choose a network", "Skip for now"], 0, 46);
+      obDots(d, 4); d.hints([["↑↓", "choose"], ["OK", "next"], ["ESC", "back"]]); } },
+  { id: "ob6", name: "6 Time zone", keys: ["`", ";", ".", "enter"],
+    note: "Step 6: the time zone list from the Clock, starting on US Central.",
+    draw(d, P) { d.ground(); d.header("Time zone");
+      d.list(["US Mountain (Denver)", "US Arizona (Phoenix)", "US Central (Chicago)", "US Eastern (New York)", "Alaska (Anchorage)"], 2);
+      obDots(d, 5); d.hints([["↑↓", "move"], ["OK", "next"], ["ESC", "back"]]); } },
+  { id: "ob7", name: "7 All set", keys: ["enter"],
+    note: "Step 7: a short map of where things are, then OK opens the Clock. Settings has 'Show welcome again' to replay this tour.",
+    draw(d, P) { d.ground();
+      const ctx = d._ctx; ctx.strokeStyle = d.col("good"); ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.beginPath(); ctx.moveTo(108, 30); ctx.lineTo(116, 38); ctx.lineTo(132, 22); ctx.stroke();
+      d.text("All set", 120, 54, '22px "IBM Plex Sans", sans-serif', "text", "center");
+      d.text("ESC from the Clock opens your apps.", 120, 76, F.body, "dim", "center");
+      d.text("Theme, sounds and more: Settings.", 120, 92, F.body, "dim", "center");
+      obDots(d, 6); d.hints([["OK", "open the Clock"]]); } },
+  { id: "menu", name: "Main menu", keys: ["`", ";", ".", "enter", "1", "2", "3", "4", "r"],
+    note: "Icons take fixed app hues: network cyan, clock copper, storage lilac. The selected row stays a quiet panel fill.",
+    draw(d, P) { d.ground(); d.header("milliWorks");
+      [["Wi-Fi", "Connect, switch, forget"], ["Clock", "Time, zones, 12/24h"], ["SD Card", "Card info and file browser"], ["Settings", "Theme, brightness, about"]].forEach(([n, a], i) => {
+        const y = 19 + i * 26, sel = i === 0;
+        if (sel) d.fill("panel", 2, y, 234, 24, 5);
+        d.fill([...P.icons, P.dim][i], 6, y + 4, 16, 16, 4); d.text(String(i + 1), 14, y + 12.5, '600 12px "IBM Plex Sans"', "bg", "center");
+        d.text(n, 30, y + 7, F.body, sel ? "text" : "dim"); d.text(a, 30, y + 18, F.cap, sel ? "text" : "dim");
+      });
+      d.hints([["↑↓", "move"], ["OK", "open"], ["1-4", "jump"], ["R", "flip"]]); } },
+  { id: "home", name: "Home (icons)", keys: ["`", ";", ".", ",", "/", "enter", "1", "2", "3", "4"],
+    note: "An icon grid instead of the list: four apps a row, arrows move in all directions, the selected app gets a copper ring. The second row shows apps that are still to come.",
+    draw(d, P) { d.ground(); d.header("milliWorks");
+      const ctx = d._ctx, S = 34, R = 9;
+      const apps = [
+        ["Wi-Fi", P.icons[0], "wifi"], ["Clock", P.icons[1], "clock"], ["SD Card", P.icons[2], "sd"], ["Settings", P.dim, "gear"],
+        ["Flow", P.bad, "focus"], ["Status", P.good, "status"], ["Breathe", P.icons[0], "breathe"], ["Music", P.warn, "music", 1],
+      ];
+      const sel = 1;
+      apps.forEach(([label, hue, glyph, soon], i) => {
+        const col = i % 4, row = Math.floor(i / 4);
+        const cx = 30 + col * 60, x = cx - S / 2, y = 21 + row * 50;
+        ctx.globalAlpha = soon ? .35 : 1;
+        d.fill(hue, x, y, S, S, R);
+        drawGlyph(ctx, glyph, cx, y + S / 2, d.col("bg"));
+        ctx.globalAlpha = 1;
+        if (i === sel) { ctx.strokeStyle = d.col("accent"); ctx.lineWidth = 2; rr.call(ctx, x - 3, y - 3, S + 6, S + 6, R + 3); ctx.stroke(); }
+        d.text(label, cx, y + S + 8, F.cap, i === sel ? "text" : "dim", "center");
+      });
+      d.hints([["↑↓←→", "move"], ["OK", "open"], ["1-8", "jump"]]); } },
+  { id: "wifi", name: "Wi-Fi", keys: ["`", ";", ".", "enter", "del"],
+    note: "Selection turns from blue with white text to copper with dark text. Status text keeps its signal colour.",
+    draw(d, P) { d.ground(); d.header("Wi-Fi");
+      d.fill("panel", 4, 20, 232, 44, 5);
+      d.text("Connected: HomeWiFi", 10, 30, F.body, "good"); d.text("192.168.1.42   signal great (-45)", 10, 49, F.body, "dim");
+      ["Connect to a network", "Saved networks", "Disconnect"].forEach((s, i) => { const y = 70 + i * 18;
+        if (i === 0) d.fill("accent", 2, y, 236, 17, 4); d.text(s, 10, y + 9, F.body, i === 0 ? "onAccent" : "text"); });
+      d.hints([["↑↓", "move"], ["OK", "select"], ["ESC", "back"]]); } },
+  { id: "networks", name: "Choose network", keys: ["`", ";", ".", "enter", "r"],
+    note: "Signal bars show strength at a glance. Copper marks the one row you are on.",
+    draw(d, P) { d.ground(); d.header("Choose network");
+      d.list(["|||  HomeWiFi", "|||  Guest", "||   Neighbor", "|    Coffee House  (open)", "|    DIRECT-EPSON"], 0);
+      d.fill("dim", 237, 24, 2, 58); d.hints([["↑↓", "move"], ["OK", "join"], ["R", "rescan"], ["ESC", "back"]]); } },
+  { id: "password", name: "Password", keys: ["enter", "tab", "fn", "`", "del", "aa"],
+    note: "The field outline and cursor are copper: that's where your typing goes. The password stays visible until you press Tab.",
+    draw(d, P) { d.ground(); d.header("Wi-Fi");
+      d.text("Password for HomeWiFi", 6, 31, F.body, "text");
+      const ctx = d._ctx; ctx.strokeStyle = d.col("accent"); ctx.lineWidth = 1; rr.call(ctx, 4.5, 46.5, 231, 25, 4); ctx.stroke();
+      d.text('"secret+42', 10, 59, F.body, "text"); ctx.font = F.body; d.text("_", 10 + ctx.measureText('"secret+42').width, 59, F.body, "accent");
+      d.hints([["OK", "done"], ["Tab", "hide"], ["Fn+ESC", "cancel"]]); } },
+  { id: "toast", name: "Connected toast", keys: [],
+    note: "Success toasts use the signal green with dark text, which reads better than white on green.",
+    draw(d, P) { SCREENS.find(s => s.id === "wifi").draw(d, P); d.fill("good", 16, 45, 208, 44, 6); d.text("Connected & saved!", 120, 67.5, F.body, P.toastText, "center"); } },
+  { id: "clock", name: "Clock", keys: ["`", "enter", "del"],
+    note: "Seconds and the progress line turn copper. The status bar drops its small clock here, so the time isn't shown twice.",
+    draw(d, P) { d.ground(); d.header("Clock", !P.hideHeaderClockOnClock);
+      d.text("US Central (Chicago)", 120, 24, F.cap, "dim", "center");
+      d._ctx.font = F.clock; const w = d._ctx.measureText("2:05").width, x = Math.round((240 - w - 36) / 2);
+      d.text("2:05", x, 62, F.clock, "text"); d.text("PM", x + w + 8, 46, F.small, "dim"); d.text("37", x + w + 6, 72, F.fig, "accent");
+      d.fill("accent", 0, 92, Math.round(240 * 37 / 59), 2);
+      d.text("Wednesday, Nov 26", 120, 107, F.body, "text", "center");
+      d.hints([["OK", "settings"], ["ESC", "menu"]]); } },
+  { id: "clockset", name: "Clock settings", keys: ["`", ";", ".", "enter", "del"],
+    note: "Every letter shortcut from the Clock is also here as a row, so nothing has to be memorised.",
+    draw(d, P) { d.ground(); d.header("Clock settings");
+      d.list(["Time zone: US Central (Chicago)", "Format: 12-hour", "Set time by hand", "Brightness: 50%", "Wi-Fi: HomeWiFi"], 1);
+      d.hints([["↑↓", "move"], ["OK", "select"], ["ESC", "back"]]); } },
+  { id: "settime", name: "Set time", keys: ["`", ";", ".", ",", "/", "enter"],
+    note: "The field you are changing is the only copper thing on screen.",
+    draw(d, P) { d.ground(); d.header("Set time");
+      const ctx = d._ctx, parts = ["2026", "11", "26", "14", "05"], seps = ["-", "-", "  ", ":", ""]; ctx.font = F.fig;
+      let total = 0; parts.forEach((p, i) => total += ctx.measureText(p).width + ctx.measureText(seps[i]).width);
+      let x = Math.round((240 - total) / 2);
+      parts.forEach((p, i) => { const w = ctx.measureText(p).width;
+        if (i === 3) d.fill("accent", x - 2, 47, w + 4, 30, 4);
+        d.text(p, x, 62, F.fig, i === 3 ? "onAccent" : "text"); x += w; d.text(seps[i], x, 62, F.fig, "dim"); ctx.font = F.fig; x += ctx.measureText(seps[i]).width; });
+      d.text("changing the hour", 120, 96, F.body, "dim", "center");
+      d.hints([["↑↓", "change"], ["←→", "next"], ["OK", "save"], ["ESC", "cancel"]]); } },
+  { id: "confirm", name: "Forget network", keys: ["enter", "`", "del"],
+    note: "Destructive actions always ask first. The box keeps the warning outline in both looks.",
+    draw(d, P) { d.ground(); d.header("Saved networks"); d.list(["* HomeWiFi", "  iPhone"], 0);
+      d.fill("panel", 12, 36, 216, 62, 6); const ctx = d._ctx; ctx.strokeStyle = d.col("warn"); rr.call(ctx, 12.5, 36.5, 215, 61, 6); ctx.stroke();
+      d.text("Forget HomeWiFi?", 120, 56, F.body, "text", "center"); d.text("OK = yes     ESC = no", 120, 82, F.cap, "dim", "center"); } },
+  { id: "settings", name: "Settings", keys: ["`", ";", ".", "enter", "del"],
+    note: "Settings is the fourth app: theme, brightness (remembered), flip screen, and About with the device and version.",
+    draw(d, P) { d.ground(); d.header("Settings");
+      d.list(["Theme: " + P.label.replace("Today (v5)", "Green mask"), "Brightness: 70%", "Flip screen", "About"], 0);
+      d.hints([["↑↓", "move"], ["OK", "select"], ["ESC", "back"]]); } },
+  { id: "theme", name: "Theme picker", keys: ["`", ";", ".", "enter"],
+    note: "Moving through the list re-colours the whole screen at once, so you try each theme for real. OK keeps it, ESC goes back to the old one.",
+    draw(d, P) { d.ground(); d.header("Theme");
+      const ids = ["device", "daylight", "blackmask", "purplemask", "phosphor"];
+      const cur = Math.max(0, ids.indexOf(Object.keys(PAL).find(k => PAL[k] === P)));
+      d.list(ids.map(k => PAL[k].label), cur);
+      ids.forEach((k, r) => { const T = PAL[k], sw = [T.bg, T.panel, T.accent, T.icons[0], T.good]; const y = 24 + r * 18;
+        sw.forEach((c, j) => { const x = 170 + j * 12; d.fill(c, x, y, 10, 9); const ctx = d._ctx; ctx.strokeStyle = d.col("edge"); ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, 9, 8); }); });
+      d.hints([["↑↓", "try"], ["OK", "keep"], ["ESC", "cancel"]]); } },
+
+];
+
+function render(canvas, screen, ver) {
+  const ctx = canvas.getContext("2d"); ctx.imageSmoothingEnabled = false;
+  const d = make(ctx, PAL[ver]); d._ctx = ctx;
+  ctx.clearRect(0, 0, 240, 135); screen.draw(d, PAL[ver]);
+}
+
+// ---------- keyboard of the mockup ----------
+const ROWS = [
+  [["`", "esc"], ["1"], ["2"], ["3"], ["4"], ["5"], ["6"], ["7"], ["8"], ["9"], ["0"], ["-"], ["="], ["del"]],
+  [["tab"], ["q"], ["w"], ["e"], ["r"], ["t"], ["y"], ["u"], ["i"], ["o"], ["p"], ["["], ["]"], ["\\"]],
+  [["fn"], ["aa", "shift"], ["a"], ["s"], ["d"], ["f"], ["g"], ["h"], ["j"], ["k"], ["l"], [";", "↑"], ["'"], ["enter", "ok"]],
+  [["ctrl"], ["opt"], ["alt"], ["z"], ["x"], ["c"], ["v"], ["b"], ["n"], ["m"], [",", "←"], [".", "↓"], ["/", "→"], ["space"]],
+];
+const kbd = document.getElementById("kbd"), keyEls = {};
+ROWS.flat().forEach(([k, sub]) => {
+  const el = document.createElement("div"); el.className = "key";
+  el.innerHTML = `<span>${k === "aa" ? "Aa" : k}</span>${sub ? `<small class="${"↑↓←→".includes(sub) ? "arw" : ""}">${sub}</small>` : ""}`;
+  kbd.appendChild(el); keyEls[k] = el;
+});
+
+// ---------- state + UI ----------
+let ver = "device", idx = 0;   // open on the SD-card settings screens   // open on the main menu; the start-up screen is first in the list
+const lcd = document.getElementById("lcd"), chips = document.getElementById("chips");
+SCREENS.forEach((s, i) => { const b = document.createElement("button"); b.type = "button"; b.id = "chip-" + s.id; b.textContent = s.name; b.onclick = () => { idx = i; update(); arrive(); }; chips.appendChild(b); });
+function arrive() { if (document.getElementById("snd-nav")?.checked) playSound(ARRIVE[SCREENS[idx].id]); }
+const themeBox = document.getElementById("themes");
+Object.entries(PAL).forEach(([id, p]) => { const b = document.createElement("button"); b.type = "button"; b.id = "theme-" + id; b.textContent = p.label;
+  b.onclick = () => { ver = id; update(); buildPairs(); buildSounds(); playSound("select"); }; themeBox.appendChild(b); });
+function update() {
+  const s = SCREENS[idx];
+  render(lcd, s, ver);
+  [...themeBox.children].forEach(b => b.setAttribute("aria-pressed", b.id === "theme-" + ver));
+  [...chips.children].forEach((b, i) => b.setAttribute("aria-current", i === idx));
+  Object.entries(keyEls).forEach(([k, el]) => el.classList.toggle("on", s.keys.includes(k)));
+  const led = document.getElementById("rgbled");
+  led.classList.toggle("on", !!s.led); led.classList.toggle("breathe", !!(s.led && s.led.breathe));
+  if (s.led) led.style.setProperty("--led", s.led.c);
+  document.getElementById("cap-ver").textContent = PAL[ver].label;
+  document.getElementById("cap-name").textContent = s.name;
+  document.getElementById("cap-note").textContent = ver !== "v5" ? s.note : "Today's firmware: blue selection with white text, grey-blue ground.";
+}
+addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("input,textarea")) return;
+  if (e.key === "ArrowRight") { idx = (idx + 1) % SCREENS.length; update(); arrive(); }
+  if (e.key === "ArrowLeft") { idx = (idx + SCREENS.length - 1) % SCREENS.length; update(); arrive(); }
+  if (e.key === "t" || e.key === "T") { const ids = Object.keys(PAL); ver = ids[(ids.indexOf(ver) + 1) % ids.length]; update(); buildPairs(); buildSounds(); }
+});
+
+const pairs = document.getElementById("pairs");
+function buildPairs() {
+  pairs.innerHTML = "";
+  document.getElementById("legend-right").textContent = PAL[ver === "v5" ? "device" : ver].label;
+  SCREENS.forEach(s => {
+    const row = document.createElement("div"); row.className = "pair";
+    row.innerHTML = `<p class="name">${s.name}</p>`;
+    ["v5", ver === "v5" ? "device" : ver].forEach(v => {
+      const fig = document.createElement("figure"), c = document.createElement("canvas");
+      c.width = 240; c.height = 135; c.setAttribute("aria-label", `${s.name}, ${PAL[v].label}`);
+      fig.appendChild(c); const cap = document.createElement("figcaption"); cap.textContent = PAL[v].label; fig.appendChild(cap);
+      row.appendChild(fig); render(c, s, v);
+    });
+    pairs.appendChild(row);
+  });
+}
+
+
+// ---------- sound packs: one per theme (the same notes and waveforms go into the firmware) ----------
+// Each event is a list of [frequency Hz, length ms]; 0 Hz = a short rest.
+const EVENTS = {
+  move:    { name: "Move",      when: "arrow keys in a list",       gain: .35 },
+  select:  { name: "Select",    when: "OK opens or picks" },
+  back:    { name: "Back",      when: "ESC / Del" },
+  type:    { name: "Type",      when: "each typed character",       gain: .25 },
+  success: { name: "Success",   when: "connected, saved, time set" },
+  notice:  { name: "Attention", when: "forgotten, no Wi-Fi" },
+  error:   { name: "Error",     when: "could not connect" },
+  startup: { name: "Start-up",  when: "power on, under the logo" },
+};
+const PACKS = {
+  v5: { name: "Plain beep", wave: "square", gain: .6, about: "What v5 does today: the same short beep for everything.", ev: {
+    move: [[2400, 15]], select: [[2400, 15]], back: [[2400, 15]], type: [[2400, 15]], success: [[1319, 120], [0, 30], [1568, 120], [0, 30], [2093, 120]],
+    notice: [[2400, 15]], error: [[2400, 15]], startup: [[1800, 30]] } },
+  device: { name: "Copper chime", wave: "triangle", gain: 1, about: "Warm, soft chimes on a C major chord. Going forward rises, going back falls.", ev: {
+    move: [[2093, 7]], select: [[1568, 28], [2093, 40]], back: [[2093, 28], [1568, 40]], type: [[3136, 5]],
+    success: [[1319, 55], [1568, 55], [2093, 120]], notice: [[1568, 60], [0, 40], [1568, 60]], error: [[659, 90], [523, 170]],
+    startup: [[1047, 70], [1568, 70], [2093, 70], [2637, 180]] } },
+  daylight: { name: "Glass", wave: "sine", gain: .9, about: "Pure, light tones on F major, a little higher. Like tapping glass.", ev: {
+    move: [[2794, 6]], select: [[1760, 26], [2794, 38]], back: [[2794, 26], [1760, 38]], type: [[3520, 5]],
+    success: [[1397, 50], [1760, 50], [2794, 110]], notice: [[1760, 55], [0, 35], [1760, 55]], error: [[880, 90], [698, 170]],
+    startup: [[1397, 60], [1760, 60], [2093, 60], [2794, 170]] } },
+  blackmask: { name: "Gold", wave: "sine", gain: 1.1, about: "An octave lower and slower. Calm and unhurried, like the black board.", ev: {
+    move: [[1047, 8]], select: [[784, 40], [1047, 60]], back: [[1047, 40], [784, 60]], type: [[1568, 6]],
+    success: [[523, 80], [659, 80], [784, 80], [1047, 180]], notice: [[784, 90], [0, 50], [784, 90]], error: [[392, 110], [330, 220]],
+    startup: [[262, 110], [392, 110], [523, 110], [784, 260]] } },
+  purplemask: { name: "Arcade", wave: "pulse", gain: .55, about: "Quick, playful runs on a pentatonic scale with a thin game-console tone.", ev: {
+    move: [[2349, 6]], select: [[1480, 24], [2349, 32]], back: [[2349, 24], [1480, 32]], type: [[2960, 5]],
+    success: [[1175, 40], [1480, 40], [1760, 40], [2349, 100]], notice: [[1976, 45], [0, 30], [1976, 45]], error: [[740, 70], [587, 70], [440, 140]],
+    startup: [[1175, 50], [1319, 50], [1480, 50], [1760, 50], [2349, 150]] } },
+  phosphor: { name: "Terminal", wave: "square", gain: .45, about: "Flat square-wave beeps on one or two pitches, like an old computer terminal.", ev: {
+    move: [[1200, 8]], select: [[1200, 40]], back: [[900, 40]], type: [[1800, 4]],
+    success: [[1200, 60], [0, 30], [1200, 60]], notice: [[1200, 150]], error: [[220, 260]],
+    startup: [[1200, 120], [0, 60], [1200, 40]] } },
+  contrast: { name: "Clear", wave: "sine", gain: 1.3, about: "Wide jumps in pitch and a little louder, so every sound is easy to tell apart.", ev: {
+    move: [[1568, 10]], select: [[1047, 40], [2093, 60]], back: [[2093, 40], [1047, 60]], type: [[2637, 6]],
+    success: [[1047, 70], [1568, 70], [2093, 160]], notice: [[1568, 80], [0, 60], [1568, 80]], error: [[523, 120], [262, 220]],
+    startup: [[523, 90], [1047, 90], [2093, 200]] } },
+};
+let actx = null, pulseWave = null;
+function packId() { return PACKS[ver] ? ver : "device"; }
+// The Cardputer's sounds, rendered from the firmware's own code by tools/render_sounds.cpp.
+const wavCache = {};
+async function playWav(file, gainValue, loop = false, dest = null) {
+  actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === "suspended") actx.resume();
+  if (!wavCache[file]) wavCache[file] = fetch("sounds/" + file).then(r => { if (!r.ok) throw new Error(file); return r.arrayBuffer(); }).then(b => actx.decodeAudioData(b));
+  const buf = await wavCache[file];
+  const src = actx.createBufferSource(), g = actx.createGain();
+  src.buffer = buf; src.loop = loop; g.gain.value = gainValue;
+  src.connect(g).connect(dest || actx.destination); src.start();
+  return { src, g, seconds: buf.duration };
+}
+function playSound(id) {
+  const pack = PACKS[packId()], notes = pack.ev[id]; if (!notes) return;
+  if (packId() !== "v5") {
+    const vol = +document.getElementById("snd-vol").value / 100;
+    playWav(`sfx_${packId()}_${id}.wav`, vol * 1.4).then(({ seconds }) => {
+      const btn = document.getElementById("snd-" + id);
+      if (btn) { btn.classList.add("playing"); setTimeout(() => btn.classList.remove("playing"), seconds * 1000 + 80); }
+    }).catch(() => {});
+    return;
+  }
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    if (!pulseWave) {                      // 25% pulse: the thin "game console" tone
+      const n = 32, re = new Float32Array(n), im = new Float32Array(n);
+      for (let k = 1; k < n; k++) im[k] = (2 / (k * Math.PI)) * Math.sin(k * Math.PI * .25);
+      pulseWave = actx.createPeriodicWave(re, im);
+    }
+    const vol = (+document.getElementById("snd-vol").value / 100) * (EVENTS[id].gain || 1) * pack.gain * .45;
+    let t = actx.currentTime + .01;
+    notes.forEach(([f, ms]) => {
+      const d = ms / 1000;
+      if (f > 0) {
+        const o = actx.createOscillator(), g = actx.createGain();
+        if (pack.wave === "pulse") o.setPeriodicWave(pulseWave); else o.type = pack.wave;
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .004);
+        g.gain.setValueAtTime(vol, t + Math.max(.004, d - .012)); g.gain.linearRampToValueAtTime(0, t + d);
+        o.connect(g).connect(actx.destination); o.start(t); o.stop(t + d + .02);
+      }
+      t += d;
+    });
+    const btn = document.getElementById("snd-" + id);
+    if (btn) { btn.classList.add("playing"); setTimeout(() => btn.classList.remove("playing"), (t - actx.currentTime) * 1000 + 80); }
+  } catch (e) { /* no audio in this view */ }
+}
+const grid = document.getElementById("sound-grid");
+function buildSounds() {
+  const pack = PACKS[packId()];
+  document.getElementById("snd-pack").textContent = `${pack.name} \u00b7 ${PAL[packId()].label}`;
+  document.getElementById("snd-about").textContent = pack.about;
+  grid.innerHTML = "";
+  Object.entries(EVENTS).forEach(([id, ev]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "snd"; b.id = "snd-" + id;
+    b.innerHTML = `<strong>${ev.name}</strong><span>${ev.when}</span><span>${pack.ev[id].filter(n => n[0]).map(n => n[0] + " Hz").join(" \u00b7 ")}</span>`;
+    b.onclick = () => playSound(id); grid.appendChild(b);
+  });
+}
+buildSounds();
+// Which sound each preview screen would make when you arrive on it.
+const ARRIVE = { sd1: "select", sd2: "notice", sd3: "success", sd4: "select", sd5: "startup", sd6: "select", sd7: "notice", br1: "select", br2: "select", br4: "move", br3: "back", st1: "select", st2: "notice", st3: "select", st4: "success", fl1: "select", fl2: "success", fl2m: "back", fl3: "select", fl4: "move", fl5: "success", fl6: "success", pc1: "startup", pc2: "select", pc2b: "success", pc3: "select", pc4: "select", pc5: "success", "pc-ask": "select", "pc-typing": "type", "pc-think": "select", "pc-action": "success", "pc-answer": "success", "pc-focus": "select", "pc-done": "notice", ob1: "startup", ob2: "select", ob3: "select", ob4: "success", ob5: "select", ob6: "select", ob7: "success", splash: "startup", menu: "back", home: "back", wifi: "select", networks: "select", password: "select", toast: "success",
+                 clock: "select", clockset: "select", settime: "select", confirm: "notice", settings: "select", theme: "move" };
+
+// ---------- focus sounds for the Flow app: generated, looping, with mute ----------
+const FOCUS_SOUNDS = {
+  brown: { name: "Brown noise", about: "deep and even, hides voices" },
+  rain:  { name: "Rain", about: "soft rain with the odd drop" },
+  drone: { name: "Soft drone", about: "two low tones that breathe slowly" },
+  tick:  { name: "Ticking clock", about: "one quiet tick a second" },
+  breath: { name: "Breathing music", about: "Breathe app: 2 calm breaths (in 4, hold 4, out 6)" },
+};
+let focusNodes = null, focusMaster = null, focusId = null, focusMuted = false;
+function focusCtx() {
+  actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === "suspended") actx.resume();
+  if (!focusMaster) { focusMaster = actx.createGain(); focusMaster.connect(actx.destination); }
+  return actx;
+}
+function noiseBuffer(ctx, seconds, fill) {
+  const b = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate), d = b.getChannelData(0); fill(d, ctx.sampleRate); return b;
+}
+function stopFocus() { if (focusNodes) { focusNodes.forEach(n => { try { n.stop ? n.stop() : n.disconnect(); } catch (e) {} }); focusNodes = null; } focusId = null; }
+function startFocus(id) {
+  try {
+    const ctx = focusCtx(); stopFocus(); focusId = id;
+    const vol = (+document.getElementById("snd-vol").value / 100) * 1.6;
+    focusMaster.gain.setValueAtTime(focusMuted ? 0 : vol, ctx.currentTime);
+    playWav(`focus_${id}.wav`, 1, true, focusMaster).then(({ src }) => { if (focusId === id) focusNodes = [src]; else src.stop(); }).catch(() => {});
+    buildFocusUI();
+  } catch (e) { /* no audio in this view */ }
+}
+function toggleFocusMute() {
+  focusMuted = !focusMuted;
+  if (focusMaster && actx) { const vol = (+document.getElementById("snd-vol").value / 100) * 1.6;
+    focusMaster.gain.setTargetAtTime(focusMuted ? 0 : vol, actx.currentTime, .03); }
+  buildFocusUI();
+}
+function buildFocusUI() {
+  const box = document.getElementById("focus-sounds"); box.innerHTML = "";
+  Object.entries(FOCUS_SOUNDS).forEach(([id, f]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "snd" + (focusId === id ? " playing" : ""); b.id = "fs-" + id;
+    b.innerHTML = `<strong>${focusId === id ? "Playing: " : ""}${f.name}</strong><span>${f.about}</span>`;
+    b.onclick = () => focusId === id ? (stopFocus(), buildFocusUI()) : startFocus(id); box.appendChild(b); });
+  const m = document.createElement("button"); m.type = "button"; m.className = "snd"; m.id = "fs-mute";
+  m.innerHTML = `<strong>${focusMuted ? "Unmute (M)" : "Mute (M)"}</strong><span>${focusMuted ? "sound is off" : "silence it instantly"}</span>`;
+  m.onclick = toggleFocusMute; box.appendChild(m);
+}
+buildFocusUI();
+(function () {
+  const box = document.getElementById("guide-sounds");
+  [["voice_in", "Voice: Breathe in", "spoken"], ["voice_hold", "Voice: Hold", "spoken"], ["voice_out", "Voice: Breathe out", "spoken"],
+   ["voice_builtin_in", "Built-in: Breathe in", "phone quality, no card needed"], ["voice_builtin_hold", "Built-in: Hold", "fallback"], ["voice_builtin_out", "Built-in: Breathe out", "fallback"],
+   ["breath_cue_in", "Tones: in", "three notes up"], ["breath_cue_hold", "Tones: hold", "two soft taps"], ["breath_cue_out", "Tones: out", "three notes down"]].forEach(([f, n, a]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "snd"; b.id = "gs-" + f;
+    b.innerHTML = `<strong>${n}</strong><span>${a}</span>`;
+    b.onclick = () => { b.classList.add("playing"); playWav(f + ".wav", +document.getElementById("snd-vol").value / 100 * 1.4).then(({ seconds }) => setTimeout(() => b.classList.remove("playing"), seconds * 1000 + 80)).catch(() => b.classList.remove("playing")); };
+    box.appendChild(b); });
+})();
+addEventListener("keydown", e => { if ((e.key === "m" || e.key === "M") && focusId && !(e.target.closest && e.target.closest("input,textarea"))) toggleFocusMute(); });
+
+function drawAll() { update(); buildPairs(); }
+drawAll();
+// Redraw once the web fonts that stand in for the device fonts have loaded.
+Promise.all([F.body, F.cap, F.capB, F.fig, F.clock].map(f => document.fonts.load(f).catch(() => {}))).then(drawAll);
+</script>

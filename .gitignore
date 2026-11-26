@@ -1,0 +1,18 @@
+# Build output (PlatformIO) and Mac clutter
+.pio/
+.DS_Store
+__pycache__/
+
+# Your own device's factory backup: a full flash image (can hold saved Wi-Fi passwords and
+# the device's MAC address). Never share it.
+backup/
+
+# Built firmware: published as GitHub Releases instead of in the code history.
+dist/
+
+# The Samantha clips come from Apple's macOS voice, which may not be shared. Anyone can make
+# them again on a Mac with: python3 tools/make_voice.py
+design/sd/milliWorks/breathe/voices/samantha/
+design/sounds/voice_in.wav
+design/sounds/voice_hold.wav
+design/sounds/voice_out.wav
