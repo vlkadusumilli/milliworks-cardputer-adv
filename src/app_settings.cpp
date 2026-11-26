@@ -59,6 +59,10 @@ static void about() {
         canvas.setTextColor(col::text);
         canvas.drawString(FW_NAME, 12, HEADER_H + 12);
         canvas.setFont(&fonts::Font2);
+        canvas.setTextColor(col::accent);
+        canvas.setTextDatum(top_right);
+        canvas.drawString("by " FW_AUTHOR, SCREEN_W - 12, HEADER_H + 18);
+        canvas.setTextDatum(top_left);
         canvas.setTextColor(col::dim);
         canvas.drawString(String("Version ") + FW_VERSION + "  for " + deviceName(), 12, HEADER_H + 42);
         canvas.drawString(String("Theme: ") + THEMES[savedTheme()].name, 12, HEADER_H + 58);

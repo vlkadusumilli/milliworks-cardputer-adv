@@ -303,9 +303,9 @@ bool appWifi() {
             canvas.setTextColor(col::good);
             canvas.drawString("Connected: " + WiFi.SSID(), 10, HEADER_H + 7);
             canvas.setTextColor(col::dim);
-            canvas.drawString(WiFi.localIP().toString() + "   signal " +
-                              (rssi > -60 ? "great" : rssi > -70 ? "good" : "weak") +
-                              " (" + String(rssi) + ")", 10, HEADER_H + 26);
+            drawTextFit(WiFi.localIP().toString() + "  signal " +
+                        (rssi > -60 ? "great" : rssi > -70 ? "good" : "weak") +
+                        " (" + String(rssi) + ")", 10, HEADER_H + 26, SCREEN_W - 24, &fonts::Font2, &fonts::Font0);
         } else {
             canvas.setTextColor(col::warn);
             canvas.drawString("Not connected", 10, HEADER_H + 7);

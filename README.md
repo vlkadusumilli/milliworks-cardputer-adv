@@ -1,20 +1,74 @@
 # milliWorks for the M5Stack Cardputer ADV
 
+*By [vlkadusumilli](https://github.com/vlkadusumilli) (vlka)*
+
 A small, friendly set of apps for the **M5Stack Cardputer ADV**: a clock that keeps time
 without waiting for the internet, a focus timer with calming sounds, a status light for
 "do not disturb", and a guided breathing app with a voice that counts with you.
 
-| App | What it does |
-|---|---|
-| **Clock** | Internet time (NTP), shows the last known time straight away, time zones, 12/24 h, optional RTC module |
-| **Wi-Fi** | Scan, join and remember up to 5 networks; reconnects quickly to the last one |
-| **Flow** | Focus sessions with an intention, background sounds (rain, brown noise, drone, tick), a "park this thought" note, breaks and a summary |
-| **Status** | The RGB LED shows Busy / Free / Focus so people around you know |
-| **Breathe** | Calm, Box, 4-7-8 and Even patterns; a voice says *In / Hold / Out* and counts each second, matching the numbers on screen. Optional calm music |
-| **SD Card** | See what's on the card and browse it |
-| **Settings** | 6 themes with matching sound packs, brightness, volume, voice, flip screen, save/load all settings to the SD card |
+<p align="center"><img src="docs/screenshots/home.png" width="480" alt="milliWorks home screen: eight app icons"></p>
 
-The Music app is coming.
+The home screen: pick an app with the arrow keys, or press its number (1–8).
+
+## The apps
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/clock.png" alt="Clock app"></td>
+<td><b>Clock</b><br>Big, easy-to-read time and date. It shows the last known time the moment you
+switch on, then corrects itself from the internet (NTP). Choose your time zone and 12/24-hour
+format, or set the time by hand. An RTC module on the Grove port keeps time with the power off.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/wifi.png" alt="Wi-Fi app"></td>
+<td><b>Wi-Fi</b><br>Scan and join networks. The password is shown while you type, so typos are
+easy to spot (Tab hides it). Remembers up to 5 networks and reconnects to the last one quickly
+at start-up.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/flow.png" alt="Flow app"></td>
+<td><b>Flow</b><br>A focus timer. Write what you're working on, choose a length, a background
+sound (rain, brown noise, drone, tick) and a break. During the session you can park a
+distracting thought for later, switch or mute the sound, and see a summary at the end. Parked
+thoughts are saved to the SD card.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/status.png" alt="Status app"></td>
+<td><b>Status</b><br>Turns the Cardputer into a sign for people around you: <i>Do not disturb</i>,
+<i>Focusing</i>, <i>In a meeting</i> or <i>Free, come in</i>, shown on the screen and by the colour of
+the RGB LED.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/breathe.png" alt="Breathe app settings"></td>
+<td><b>Breathe</b><br>Guided breathing with four patterns: Calm (4-4-6), Box (4-4-4-4), 4-7-8 and
+Even (5-5). Choose the length, calm background music, and how you're guided: <b>Count</b>
+(a voice says <i>In / Hold / Out</i> and counts each second), Voice, Tones, or Silent. Made
+for eyes-closed use.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/breathe-session.png" alt="Breathe session"></td>
+<td><b>Breathe, during a session</b><br>The circle grows as you breathe in and shrinks as you
+breathe out, and the LED glows with it. The number on screen is the same number the voice says.
+Press M to mute the music.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/sd.png" alt="SD Card app"></td>
+<td><b>SD Card</b><br>What card is inserted, how full it is, and a file browser.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/settings.png" alt="Settings app"></td>
+<td><b>Settings</b><br>Six themes, each with its own sound pack. Also brightness, sound volume,
+the Breathe voice, flip screen, the welcome tour, and the keyboard bridge for the simulator.
+<b>Save settings to SD card</b> lets you move your setup to another Cardputer.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/about.png" alt="About screen"></td>
+<td><b>About</b><br>Version, theme, sound pack and whether an RTC module is fitted.</td>
+</tr>
+</table>
+
+The Music app is coming. Screenshots are from the Mac simulator running the real firmware,
+so they match the device pixel for pixel.
 
 ## Install
 
@@ -154,7 +208,21 @@ c++ -std=c++17 -O2 -I src tools/render_sounds.cpp -o /tmp/rs && /tmp/rs        #
 c++ -std=c++17 -O2 -I src tools/test_sd_features.cpp -o /tmp/sd && /tmp/sd     # settings file + voice loading
 ```
 
+## License
+
+[Apache License 2.0](LICENSE). Use, change and share milliWorks freely, including in your
+own projects and products. When you fork or redistribute it, you must:
+
+- keep the [`NOTICE`](NOTICE) file, which credits **vlkadusumilli** as the original author, and the copyright lines;
+- mark the files you changed;
+- include the license.
+
+The About screen's "by vlka" credit (`FW_AUTHOR` in `config.h`) is part of that attribution.
+Keep it, or add your name next to it.
+
 ## Credits
+
+- milliWorks is created by [vlkadusumilli](https://github.com/vlkadusumilli).
 
 - Built on [M5Unified](https://github.com/m5stack/M5Unified), [M5GFX](https://github.com/m5stack/M5GFX) and [M5Cardputer](https://github.com/m5stack/M5Cardputer).
 - Voices Luna and Julian were generated with Seed Audio (ByteDance) through Higgsfield.

@@ -1,0 +1,15 @@
+milliWorks
+Copyright 2026 vlkadusumilli (https://github.com/vlkadusumilli)
+
+Created by vlkadusumilli. Original project:
+https://github.com/vlkadusumilli/milliworks-cardputer
+
+This product includes software, sounds and voice recordings developed by vlkadusumilli,
+licensed under the Apache License, Version 2.0 (see LICENSE).
+
+If you fork, modify or redistribute milliWorks, keep this NOTICE file (with your own
+additions, if any) and the credit to vlkadusumilli, as section 4 of the license requires.
+
+Third-party parts (not covered by this NOTICE's copyright):
+- M5Unified, M5GFX and M5Cardputer by M5Stack (MIT License), downloaded at build time.
+- The Luna and Julian voices were generated with Seed Audio (ByteDance) via Higgsfield.

@@ -329,7 +329,7 @@ bool SimWiFi::isConnected() {
 }
 String SimWiFi::SSID() { return connected; }
 int32_t SimWiFi::RSSI() { return -45; }
-IPAddress SimWiFi::localIP() { return connected.empty() ? IPAddress() : IPAddress{192, 168, 86, 165}; }
+IPAddress SimWiFi::localIP() { return connected.empty() ? IPAddress() : IPAddress{192, 168, 1, 42}; }
 uint8_t* SimWiFi::BSSID() { return bssid; }
 int32_t SimWiFi::channel() { return 6; }
 int16_t SimWiFi::scanNetworks(bool, bool) { delay(600); return sizeof(NETS) / sizeof(NETS[0]); }
