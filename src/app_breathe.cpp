@@ -65,11 +65,11 @@ static void musicCue(const Pattern& p, int idx, bool bells) {
 }
 
 // ---- Guidance: how you know the phase with your eyes closed ----------------------------
-// Saved by number (br_gd), so new choices go at the end; ORDER is how they appear.
-enum Guidance { G_VOICE, G_TONES, G_SILENT, G_VCOUNT, G_COUNT };
-static const char* GUIDANCE_NAME[G_COUNT] = {"Voice", "Tones", "Silent", "Count"};
-static const Guidance ORDER[G_COUNT] = {G_VCOUNT, G_VOICE, G_TONES, G_SILENT};
-static bool usesVoice(int g) { return g == G_VOICE || g == G_VCOUNT; }
+// Saved by number (br_gd). Whether the voice also counts is its own setting (br_cnt).
+// v19-beta.1/.2 saved 3 for "Count": that is now Voice with counting on.
+enum Guidance { G_VOICE, G_TONES, G_SILENT, G_COUNT };
+static const char* GUIDANCE_NAME[G_COUNT] = {"Voice", "Tones", "Silent"};
+static bool usesVoice(int g) { return g == G_VOICE; }
 static uint32_t duckUntil = 0;
 
 // A calm voice says "Breathe in" / "Hold" / "Breathe out" on its own speaker channel (2),
@@ -96,14 +96,14 @@ static void cue(Guidance g, const Pattern& p, int idx, bool music) {
     else if (g == G_TONES) playBreathCue(idx == 0 ? 0 : idx == 2 ? 2 : 1);
 }
 
-static void session(const Pattern& p, int minutes, bool music, Guidance guide) {
+static void session(const Pattern& p, int minutes, bool music, Guidance guide, bool count) {
     uint32_t start = millis(), total = minutes * 60000UL;
     int lastPhase = -1;
     // Count: "In" is the first second, then "two", "three"... one per second
     // to the end of the phase, so the count always matches the pattern (4-7-8 counts to 8).
     uint32_t phaseStart = 0;
     int nextNum = 0;
-    bool counting = guide == G_VCOUNT;
+    bool counting = usesVoice(guide) && count;
     if (music) { focusSoundStart(FS_BREATH); focusBreathSet(196.0f, 0.06f, 0.5f); }
     // The word the voice says, and the same number the voice counts (1 = the word itself).
     static const char* WORD[] = {"In", "Hold", "Out", "Hold"};
@@ -176,25 +176,30 @@ void appBreathe() {
     int pat = constrain(pr.getInt("br_pat", 0), 0, PATTERN_COUNT - 1);
     int len = constrain(pr.getInt("br_len", 1), 0, 3);
     bool music = pr.getBool("br_mus", true);
-    int guide = constrain(pr.getInt("br_gd", G_VCOUNT), 0, G_COUNT - 1);
+    int guide = pr.getInt("br_gd", G_VOICE);
+    bool count = pr.getBool("br_cnt", true);           // the voice counts 2, 3, 4... (default on)
     pr.end();
+    if (guide < 0 || guide >= G_COUNT) guide = G_VOICE; // 3 = the beta's "Count": Voice, counting
+    const int ROWS = 5;
     int sel = 0;
     while (true) {
         M5Cardputer.update();
         Input in = readInput();
         if (in.back) { voiceUnload(); toldBuiltin = false; return; }
-        if (in.up) sel = (sel + 3) % 4;
-        if (in.down) sel = (sel + 1) % 4;
+        if (in.up) sel = (sel + ROWS - 1) % ROWS;
+        if (in.down) sel = (sel + 1) % ROWS;
         if (in.left || in.right) {
             int step = in.right ? 1 : -1;
             if (sel == 0) pat = (pat + step + PATTERN_COUNT) % PATTERN_COUNT;
             else if (sel == 1) len = (len + step + 4) % 4;
             else if (sel == 2) {                        // hear the choice straight away
-                int at = 0;
-                while (ORDER[at] != guide) at++;
-                guide = ORDER[(at + step + G_COUNT) % G_COUNT];
+                guide = (guide + step + G_COUNT) % G_COUNT;
                 if (usesVoice(guide)) { if (ensureVoice()) speak(0, false); }
                 else if (guide == G_TONES) playBreathCue(0);
+            }
+            else if (sel == 3) {                        // hear it: "two"
+                count = !count;
+                if (count && usesVoice(guide) && ensureVoice()) voiceCount(2);
             }
             else music = !music;
         }
@@ -204,34 +209,42 @@ void appBreathe() {
             pr.putInt("br_len", len);
             pr.putBool("br_mus", music);
             pr.putInt("br_gd", guide);
+            pr.putBool("br_cnt", count);
             pr.end();
             Guidance g = (Guidance)guide;
             if (usesVoice(g)) ensureVoice();
-            session(PATTERNS[pat], MINUTES[len], music, g);
+            session(PATTERNS[pat], MINUTES[len], music, g, count);
             continue;
         }
         drawHeader("Breathe");
         // A still preview of the circle on the left, settings on the right.
         drawBreathCircle(46, 58, 10, 32, 0.6f, col::trace);
-        const char* labels[] = {"Pattern", "Length", "Guidance", "Music"};
-        String values[] = {PATTERNS[pat].name, String(MINUTES[len]) + " min", GUIDANCE_NAME[guide], music ? "On" : "Off"};
-        for (int i = 0; i < 4; i++) {
-            int y = 21 + i * 19;
-            if (i == sel) canvas.fillRoundRect(94, y, 142, 17, 4, col::accent);
+        const char* labels[ROWS] = {"Pattern", "Length", "Guidance", "Count", "Music"};
+        String values[ROWS] = {PATTERNS[pat].name, String(MINUTES[len]) + " min", GUIDANCE_NAME[guide],
+                               count ? "On" : "Off", music ? "On" : "Off"};
+        for (int i = 0; i < ROWS; i++) {
+            int y = 19 + i * 17;
+            bool idle = i == 3 && !usesVoice(guide);    // Count only matters with the voice
+            if (i == sel) canvas.fillRoundRect(94, y, 142, 16, 4, col::accent);
             canvas.setFont(&fonts::Font2);
             canvas.setTextDatum(middle_left);
             canvas.setTextColor(i == sel ? col::onAccent : col::dim);
-            canvas.drawString(labels[i], 100, y + 9);
+            canvas.drawString(labels[i], 100, y + 8);
             canvas.setTextDatum(middle_right);
-            canvas.setTextColor(i == sel ? col::onAccent : col::text);
-            canvas.drawString(values[i], 230, y + 9);
+            canvas.setTextColor(i == sel ? col::onAccent : idle ? col::dim : col::text);
+            canvas.drawString(values[i], 230, y + 8);
         }
         canvas.setFont(&fonts::Font0);
         canvas.setTextDatum(middle_left);
         canvas.setTextColor(col::dim);
         // Below the circle the line has the whole screen width (228 px = 38 small characters).
-        drawTextFit(sel == 2 ? String(guide == G_VCOUNT ? "Voice says in, hold, out and counts" : guide == G_VOICE ? "Voice says: in, hold, out" : guide == G_TONES ? "Tones: up=in, 2 taps=hold, down=out" : "Silent: no cues (bells if music on)")
-                             : String(PATTERNS[pat].name) + ": " + PATTERNS[pat].about, 6, 110, SCREEN_W - 12, &fonts::Font0);
+        String about;
+        if (sel == 2) about = guide == G_VOICE ? (count ? "Voice: in, 2, 3, 4 - hold, 2... - out" : "Voice says: in, hold, out")
+                            : guide == G_TONES ? "Tones: up=in, 2 taps=hold, down=out" : "Silent: no cues (bells if music on)";
+        else if (sel == 3) about = !usesVoice(guide) ? "Counting needs Guidance: Voice"
+                                   : count ? "The voice counts every second" : "The voice says only in, hold, out";
+        else about = String(PATTERNS[pat].name) + ": " + PATTERNS[pat].about;
+        drawTextFit(about, 6, 110, SCREEN_W - 12, &fonts::Font0);
         drawHints({{"OK", "start"}, {ARROWS_LR, "change"}, {ARROWS_UD, "move"}, {"ESC", "home"}});
         pushScreen();
         delay(15);

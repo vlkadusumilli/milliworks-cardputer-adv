@@ -8,7 +8,7 @@ without waiting for the internet, a focus timer with calming sounds, a status li
 
 <p align="center"><img src="docs/screenshots/home.png" width="480" alt="milliWorks home screen: eight app icons"></p>
 
-The home screen: pick an app with the arrow keys, or press its number (1–8).
+The home screen: pick an app with the arrow keys, or press its number (1–7).
 
 ## The apps
 
@@ -41,9 +41,9 @@ the RGB LED.</td>
 <tr>
 <td><img src="docs/screenshots/breathe.png" alt="Breathe app settings"></td>
 <td><b>Breathe</b><br>Guided breathing with four patterns: Calm (4-4-6), Box (4-4-4-4), 4-7-8 and
-Even (5-5). Choose the length, calm background music, and how you're guided: <b>Count</b>
-(a voice says <i>In / Hold / Out</i> and counts each second), Voice, Tones, or Silent. Made
-for eyes-closed use.</td>
+Even (5-5). Choose the length, calm background music, and how you're guided: <b>Voice</b> (says
+<i>In / Hold / Out</i>, and with <b>Count</b> on it counts each second: <i>In, two, three,
+four</i>), Tones, or Silent. Made for eyes-closed use.</td>
 </tr>
 <tr>
 <td><img src="docs/screenshots/breathe-session.png" alt="Breathe session"></td>
@@ -95,7 +95,7 @@ the next version early. See [RELEASING.md](RELEASING.md) and [CHANGELOG.md](CHAN
 1. Download `milliWorks-sd-card.zip` from the same release and unzip it.
 2. Copy the `milliWorks` folder to the top level of the SD card. It holds `milliWorks/breathe/voices/luna` and `julian`.
    - If milliWorks has already started with the card inserted, the folders are already there. Copy the `luna` and `julian` folders into `milliWorks/breathe/voices/`.
-3. On the Cardputer: **Settings → Breathe voice**, then pick **luna** (female) or **julian** (male).
+3. On the Cardputer, Breathe uses **luna** (female) straight away. Switch to **julian** (male) in **Settings → Breathe voice**.
 
 There's also a small voice built into the firmware, so Breathe works without the card. It
 doesn't count, though.

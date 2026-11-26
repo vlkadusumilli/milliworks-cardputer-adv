@@ -54,11 +54,11 @@ gives `v19-beta.2`).
 - [ ] The Clock shows a time straight away, then the right time once Wi-Fi connects.
 
 **Apps**
-- [ ] Home: arrows, OK, number keys 1–8 and Back all work.
+- [ ] Home: arrows, OK, number keys 1–7 and Back all work.
 - [ ] Wi-Fi: connected network, IP and signal fit on one line; scan and join work.
 - [ ] Flow: a short session starts, the sound plays and mutes (M), parking a thought saves to `/milliWorks/flow/parked.txt`.
 - [ ] Status: each status changes the LED colour.
-- [ ] Breathe (Guidance **Count**, voice luna, then julian): *In, two, three, four* is in time with the screen's numbers for Calm, Box and 4-7-8. Music dips while the voice speaks.
+- [ ] Breathe (Guidance **Voice**, Count **On**, voice luna, then julian): *In, two, three, four* is in time with the screen's numbers for Calm, Box and 4-7-8. Music dips while the voice speaks.
 - [ ] Breathe with the SD card out: the built-in voice says *In / Hold / Out* and nothing crashes.
 - [ ] Settings: change the theme (sounds change too), save to SD, load from SD.
 - [ ] Anything that changed in this version (see CHANGELOG).

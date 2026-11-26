@@ -29,7 +29,7 @@ static const App APPS[] = {
     {"Flow",     &col::bad,    G_FOCUS,   appFlow},
     {"Status",   &col::good,   G_STATUS,  appStatus},
     {"Breathe",  &col::trace,  G_BREATHE, appBreathe},
-    {"Music",    &col::warn,   G_MUSIC,   nullptr},
+    // {"Music",    &col::warn,   G_MUSIC,   nullptr},   // hidden until the Music app is ready
 };
 static const int APP_COUNT = sizeof(APPS) / sizeof(APPS[0]);
 static const int COLS = 4;
@@ -147,7 +147,7 @@ static void drawHome() {
         canvas.setTextColor(sel ? col::text : col::dim);
         canvas.drawString(a.name, cx, y + S + 8);
     }
-    drawHints({{ARROWS_UD ARROWS_LR, "move"}, {"OK", "open"}, {"1-8", "jump"}, {"R", "flip"}});
+    drawHints({{ARROWS_UD ARROWS_LR, "move"}, {"OK", "open"}, {"1-7", "jump"}, {"R", "flip"}});
     pushScreen();
 }
 

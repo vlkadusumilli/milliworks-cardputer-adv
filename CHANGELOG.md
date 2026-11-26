@@ -6,6 +6,8 @@ when the release becomes stable.
 
 ## Unreleased
 
+- Breathe: counting is now an **On/Off** setting for the voice (Guidance: Voice, then Count: On or Off) instead of a separate "Count" guidance. If you chose Count in an earlier test build, you get Voice with Count On.
+- Home: the Music app is hidden until it's ready.
 - Breathe: uses the voice on your SD card straight away. Before, it looked for an old voice (Samantha) until you picked one in Settings, and quietly played the small built-in voice without counting. Now it uses **luna** if it's on the card, or else the first voice it finds.
 - Breathe and Settings say so on screen if a voice on the card can't be read, instead of switching to the built-in voice without telling you.
 - Release path: test builds (pre-releases such as `v19-beta.1`) come before each stable release. See [RELEASING.md](RELEASING.md).

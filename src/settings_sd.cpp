@@ -32,7 +32,7 @@ static const Key KEYS[] = {
     {"snd_on", K_BOOL}, {"snd_vol", K_INT},
     {"tz", K_INT}, {"h24", K_BOOL},
     {"fl_int", K_STR}, {"fl_len", K_INT}, {"fl_snd", K_INT}, {"fl_brk", K_INT},
-    {"br_pat", K_INT}, {"br_len", K_INT}, {"br_gd", K_INT}, {"br_mus", K_BOOL}, {"voice", K_STR},
+    {"br_pat", K_INT}, {"br_len", K_INT}, {"br_gd", K_INT}, {"br_cnt", K_BOOL}, {"br_mus", K_BOOL}, {"voice", K_STR},
     {"s0", K_STR}, {"s1", K_STR}, {"s2", K_STR}, {"s3", K_STR}, {"s4", K_STR},
 };
 
