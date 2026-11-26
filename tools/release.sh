@@ -61,8 +61,8 @@ c++ -std=c++17 -O2 -I src tools/render_sounds.cpp -o "$TMP/rs" && "$TMP/rs" | ta
 "$TMP/rs" | grep -q "no problems" || fail "a sound check failed: run the line above to see which."
 
 say "SD card and settings-file tests"
-c++ -std=c++17 -O2 -I src tools/test_sd_features.cpp -o "$TMP/sd" && "$TMP/sd" | tail -1
-"$TMP/sd" | grep -q " 0 failed" || fail "an SD test failed."
+c++ -std=c++17 -O2 -I src tools/test_sd_features.cpp -o "$TMP/sdtest" && "$TMP/sdtest" | tail -1
+"$TMP/sdtest" | grep -q " 0 failed" || fail "an SD test failed."
 
 say "Each voice clip says the right word (speech recognition)"
 swiftc -O tools/check_voice.swift -o "$TMP/cv" 2>/dev/null && "$TMP/cv" luna julian | tail -1 || fail "a voice clip says the wrong word."
@@ -72,7 +72,7 @@ make -s -C sim >/dev/null || fail "the simulator does not build."
 echo "ok"
 
 say "Firmware for the Cardputer ADV"
-pio run -e cardputer-adv -s || fail "the firmware does not build."
+pio run -e cardputer-adv > "$TMP/pio.log" 2>&1 || { tail -30 "$TMP/pio.log"; fail "the firmware does not build."; }
 mkdir -p dist
 bin="dist/milliworks-cardputer-adv-$tag.bin"
 cp .pio/build/cardputer-adv/firmware.bin "$bin"
