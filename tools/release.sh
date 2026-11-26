@@ -91,7 +91,7 @@ zip="$TMP/milliWorks-sd-card.zip"
 echo "milliWorks-sd-card.zip: $(unzip -l "$zip" | tail -1 | awk '{print $2}') files"
 
 # ---- 5. Release notes (from CHANGELOG.md) -------------------------------------------------
-changes="$(awk '/^## Unreleased/{f=1;next} /^## /{f=0} f' CHANGELOG.md | sed '/^[[:space:]]*$/N;/^\n$/D')"
+changes="$(awk '/^## Unreleased/{f=1;next} /^## /{f=0} f' CHANGELOG.md | sed '/./,$!d')"
 [[ -n "$(echo "$changes" | tr -d '[:space:]')" ]] || fail "CHANGELOG.md has nothing under '## Unreleased'. Write what changed first."
 {
     if [[ "$kind" == "beta" ]]; then

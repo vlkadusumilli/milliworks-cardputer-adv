@@ -66,6 +66,7 @@ static void about() {
         canvas.setTextColor(col::dim);
         drawTextFit(String("Version ") + FW_VERSION + "  for " + deviceName(), 12, HEADER_H + 42, SCREEN_W - 24,
                     &fonts::Font2, &fonts::Font0);           // a test build reads e.g. "19-beta.1"
+        canvas.setFont(&fonts::Font2);
         canvas.drawString(String("Theme: ") + THEMES[savedTheme()].name, 12, HEADER_H + 58);
         canvas.drawString(String("Sounds: ") + (soundsOn() ? soundPackName() : "off") +
                           (clockHasRtc() ? "   RTC: yes" : "   RTC: none"), 12, HEADER_H + 74);
