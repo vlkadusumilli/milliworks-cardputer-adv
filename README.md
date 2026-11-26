@@ -77,6 +77,55 @@ swiftc -O tools/check_voice.swift -o /tmp/check_voice && /tmp/check_voice myvoic
 | Enter | OK | OK |
 | G0 (top button) | stops the keyboard bridge | |
 
+## Make it yours (template)
+
+This repository is a **template**. Click **Use this template** at the top of the GitHub
+page to get your own copy, then:
+
+**Rename it.** Everything that carries the name lives in [`src/config.h`](src/config.h):
+
+```cpp
+#define FW_NAME    "milliWorks"     // start-up screen, welcome tour, settings file
+#define FW_VERSION "17"
+#define MW_DIR     "/milliWorks"    // the app's folder on the SD card
+#define PREFS_NS   "cardputer"      // where settings are kept in flash
+```
+
+**Add an app.** An app is a function that draws its screen and runs until you press Back:
+
+```cpp
+// src/app_hello.cpp
+#include "ui.h"
+#include "apps.h"
+
+void appHello() {
+    while (true) {
+        M5Cardputer.update();
+        Input in = readInput();              // keys, with the theme's key sounds
+        if (in.back) return;                 // ` or Del goes back to the home screen
+        drawHeader("Hello");                 // title bar with clock and battery
+        canvas.setFont(&fonts::Font4);
+        canvas.setTextColor(col::accent);    // theme colours: col::text, dim, accent, good, warn...
+        canvas.setTextDatum(middle_center);
+        canvas.drawString("Hi there!", SCREEN_W / 2, 70);
+        drawHints({{"ESC", "back"}});
+        pushScreen();                        // everything is drawn off-screen, then shown at once
+    }
+}
+```
+
+Then declare it in [`src/apps.h`](src/apps.h) (`void appHello();`) and add it to the home
+screen's `APPS` list in [`src/main.cpp`](src/main.cpp), with a colour and an icon. Icons
+are drawn in `drawGlyph`, so reuse one or add your own.
+
+**Helpers you get** (see [`src/ui.h`](src/ui.h)): `toast`, `confirm`, `pickFromList`,
+`textPrompt` (with a show/hide for passwords), `drawTextFit` (shrinks text to fit), six
+themes with matching sounds (`playSfx`), Wi-Fi, NTP time, the SD card (`sdMount`) and the
+LED (`status.h`). Try every change in the Mac simulator before putting it on the device.
+
+**Space.** Launcher gives each firmware a slot rounded up to 64 KB. milliWorks v17 is
+1086 KB, which fits a 1088 KB slot; going over moves it to the next size up.
+
 ## Build it yourself
 
 [PlatformIO](https://platformio.org):
